@@ -45,15 +45,15 @@ with st.sidebar:     # Navbar
 
     selected = option_menu(
                                menu_title="Phonepe Pulse",
-                               options=['Intro','View Data Source','Transaction Type Analysis',"User Brand Analysis","SDP Analysis",'Time-based Analysis',],
-                               icons = ['mic-fill',"database-fill",'coin','person-circle','geo-alt-fill','hourglass-split'],
+                               options=['Intro','View Data Source','Transaction Type Analysis',"User Brand Analysis","SDP Analysis",'Time-based Analysis','Insights'],
+                               icons = ['mic-fill',"database-fill",'coin','person-circle','geo-alt-fill','hourglass-split','clipboard-data-fill'],
                                menu_icon='alexa',
                                default_index=0,
                            )
 
 #__________________________________________________________________________________________________________________________________________________________________________________________---
 
-                               #________________________________________Condition_____________________________________#
+                                     #________________________________________Condition_____________________________________#
 
 
 if selected == "Transaction Type Analysis":
@@ -198,7 +198,9 @@ if selected == "Transaction Type Analysis":
 
 elif selected == "User Brand Analysis":
 
-    col1, col2, col3, col4  = st.columns([7, 7, 7, 7])
+
+    col1, col2, col3,col5 = st.columns([7, 7, 7,6])
+
     st.markdown("<style>div.block-container{padding-top:3rem;}</style>", unsafe_allow_html=True)
 
                                                                              #__________FILTERS___________#
@@ -210,26 +212,25 @@ elif selected == "User Brand Analysis":
     # 2) Quater
     cursor.execute('select distinct(quater) from public.aggregated_transaction order by quater asc')
     q_values = [i[0] for i in cursor.fetchall()]
-    with col4.expander(":violet[FILTER]"):
+    with col5.expander(":violet[FILTER]"):
         year = st.select_slider(':violet[CHOOSE YEAR]', options=y_values)
         q = st.select_slider(':violet[CHOOSE QUATER]', options=q_values)
-    col4.write("")
+
 
     # 3) State
     cursor.execute('select distinct(state) from public.map_transaction order by state desc')
     state_names = [i[0] for i in cursor.fetchall()]  # State Names
-    with col4.expander(":violet[FILTER]"):
-        state_selected = st.selectbox(':violet[CHOOSE STATE]', state_names)
 
-    col4.write("")
 
 
     # 4) Brand
 
     cursor.execute(f"select distinct(agg_users_brand) from public.aggregated_user where agg_users_brand!='Not Mentioned' order by agg_users_brand  ")
     y_values = [i[0] for i in cursor.fetchall()]
-    with col4.expander(":violet[FILTER]"):
-        brand = st.selectbox(':violet[CHOOSE BRAND]', options=y_values)
+
+    with col5.expander(":violet[FILTER]"):
+        state_selected = st.selectbox(':violet[CHOOSE STATE]', state_names)
+        st.write("")
         st.write("")
 
 #_____________________________________________________________________________________________________________________________________________________________________________
@@ -241,107 +242,194 @@ elif selected == "User Brand Analysis":
     with col1.expander(":violet[STATE]"):
         st.write("")
         st.write("")
-        st.write("")
         st.subheader(state_selected)
-        col1.write("")
-
-
+        st.write("")
 
 
     # metrics 1: Total User Registered:
 
-    query_5 = f"select sum(registered_users) from public.aggregated_user where state = '{state_selected}'  and year = '{year}' and agg_users_brand = '{brand}' group by state;"
+    query_5 = f"select sum(registered_users) from public.aggregated_user where state = '{state_selected}'  and year = '{year}'   and quater = {q} group by state;"
 
     cursor.execute(query_5)
 
     total_reg_user = [i[0] for i in cursor.fetchall()]
-    if len(total_reg_user)==0:
-        with col2.expander(":violet[Total (RU)  Year-Wise]"):
-          st.metric('',0, delta=0)
-    else:
-        with col2.expander(":violet[Total (RU)  Year-Wise]"):
-          st.metric('',f'{math.ceil((total_reg_user[0]/100000)/10)}M', delta=int(total_reg_user[0]))
 
-
-
-
+    with col2.expander(":violet[Total (RU)  Year-Wise]"):
+      st.metric('',f'{math.ceil((total_reg_user[0]/100000)/10)}M', delta=int(total_reg_user[0]))
 
 
     #_____________________________________________________________________________________________________________________________________________________________________
 
     # Metrices 2 : Appopens
 
-    query_6 = f"select  sum(agg_users_appopens) from public.aggregated_user where state = '{state_selected}' and year = '{year}' group by state"
+    query_6 = f"select  sum(agg_users_appopens) from public.aggregated_user where state = '{state_selected}' and year = '{year}'  and quater = {q} group by state"
     cursor.execute(query_6)
 
     total_app_opens = [i[0] for i in cursor.fetchall()]
 
     with col3.expander(':violet[USER APPOPENS (Y)]'):
-      st.metric('', int(total_app_opens[0]), delta=int(total_app_opens[0]))
+      st.metric('',f'{math.ceil((total_app_opens[0]/100000)/10)}M' , delta=int(total_app_opens[0]))
 
-    #________________________________________________________________________________________________________________________________________________________________________
+    st.write("")
+    st.write("")
+    st.write("")
 
-      # metrics 3: Total User Registered:
-
-    query_5 = f"select sum(registered_users) from public.aggregated_user where state = '{state_selected}'  and year = '{year}' and agg_users_brand = '{brand}' group by state;"
-
-    cursor.execute(query_5)
-
-    total_reg_user = [i[0] for i in cursor.fetchall()]
-
-    with col2.expander(":violet[Total (RU) Quater-Wise]"):
-          st.metric('', int(total_reg_user[0]), delta=int(total_reg_user[0]))
-
-    #__________________________________________________________________________________________________________________________________________________________________________
-    # Metrices 4 : Appopens (q)
-
-    query_6 = f"select  sum(agg_users_appopens) from public.aggregated_user where state = '{state_selected}' and quater = {q} and year = '{year}' group by state"
-    cursor.execute(query_6)
-    total_app_opens = [i[0] for i in cursor.fetchall()]
-    with col3.expander(':violet[USER APPOPENS (Q)]'):
-      st.metric('', int(total_app_opens[0]), delta=int(total_app_opens[0]))
-
-   #___________________________________________________________________________________________________________________________________________________________________________
-
-    # Metrics 5 : Total User Registered till now
-
-      query_5 = f"select sum(registered_users) from public.aggregated_user ;"
-      cursor.execute(query_5)
-      total_reg_user = [i[0] for i in cursor.fetchall()]
-      with col1.expander(":violet[Total (RU) Till Date (2022)]"):
-          st.metric('', int(total_reg_user[0]), delta=int(total_reg_user[0]))
-          col1.write("")
-
-
-
-    #____________________________________________________________________________________________________________________________________________________________________________
-
-      # Metrices 4 : Appopens (q)
-
-    query_6 = f"select  sum(agg_users_appopens) from public.aggregated_user;"
-    cursor.execute(query_6)
-    total_app_opens = [i[0] for i in cursor.fetchall()]
-    with col1.expander(':violet[Total Appopens Till Date (2022)]'):
-          st.metric('', int(total_app_opens[0]), delta=int(total_app_opens[0]))
-
-    #_____________________________________________________________________________________________________________________________________________________________________________
-
-    c1,c2,c3 = st.columns([4,8,2])
-    c2.title(":violet[Brand Analysis In State-Wise]")
-    c2.write("")
-    c2.write('')
    #______________________________________________________________________________________________________________________________________________________________________________
 
                                                                                         #_______CHARTS_______#
 
-    # 1) Top 10 Brand By State Registered Users
 
-    col1,col2 = st.columns([7,7])
+    col1,col2,col3,col4,col5 = st.columns([3,7,2,7,3])
+    with col2.expander(":violet[FILTER]"):
+        option = st.selectbox(":violet[Choose Option]", ['App Opens', 'Registered Users'])
+    with col4.expander(':violet[FILTER]'):
+        brand = st.selectbox(':violet[CHOOSE BRAND]', options=y_values)
+    st.write("")
+    st.write("")
 
-    query=f"select agg_users_brand,sum(agg_users_count) as val from public.aggregated_user where year = '{year}'  and quater = {q} and state = '{state_selected}' group by agg_users_brand order by val desc limit 10;"
+    col1,col2 ,col3= st.columns([8,8,8])
+
+    # 1 ) Quater  and appopens and RU in (filter year , state , year )
+
+    if option == "Registered Users":
+        query = f"select quater , sum(registered_users) from public.aggregated_user where year = '{year}' and agg_users_brand = '{brand}' and state = '{state_selected}'group by quater order by quater asc"
+        cursor.execute(query)
+        res = [i for i in cursor.fetchall()]
+        df = pd.DataFrame(res,columns=['Quater','Registered Users'])
+        fig = px.bar(df, x="Quater", y="Registered Users")
+        fig.update_layout(title_x=1)
+        fig.update_layout(
+            plot_bgcolor='#0E1117',
+            paper_bgcolor='#0E1117',
+            xaxis_title_font=dict(color='#a7269e'),
+            yaxis_title_font=dict(color='#a7269e')
+        )
+        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                          hoverlabel_font_color="#F500E6")
+        fig.update_traces(marker_color='#d450b0')
+        with col1.expander(f"{brand} brand in {state_selected} {option} Over The Quaters {year} "):
+             st.plotly_chart(fig, theme=None, use_container_width=True)
+
+    elif option == "App Opens":
+        query = f"select quater , sum(agg_users_appopens) from public.aggregated_user where year = '2021' and agg_users_brand = 'Vivo' and state = 'tamil-nadu' group by quater order by quater asc"
+        cursor.execute(query)
+        res = [i for i in cursor.fetchall()]
+        df = pd.DataFrame(res,columns=['Quater','App Opens'])
+        pie = px.pie(df, names='Quater', values='App Opens', hole=0.7,
+                     color_discrete_sequence=['#6a0578', '#a7269e', '#d450b0', '#eb8adb',
+                                              '#CA8DE1'])  # change color
+
+        pie.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                          hoverlabel_font_color="#F500E6",
+                          textposition='outside')
+
+        with col1.expander(f"{brand} brand in {state_selected} {option} Over The Quaters of {year}"):
+             st.plotly_chart(pie, theme=None, use_container_width=True)
+
+    #______________________________________________________________________________________________________________________________________________________________________
+
+    # 2) brand in RU /AP  over the year
+
+    if option == "Registered Users":
+        query = f"select year , sum(registered_users) from public.aggregated_user where  agg_users_brand = '{brand}' and state = '{state_selected}' group by year order by year  asc"
+        cursor.execute(query)
+        res = [i for i in cursor.fetchall()]
+        df = pd.DataFrame(res,columns=['Year','Registered Users'])
+        fig = px.line(df, x="Year", y="Registered Users",markers='D')
+        fig.update_layout(title_x=1)
+        fig.update_layout(
+            plot_bgcolor='#0E1117',
+            paper_bgcolor='#0E1117',
+            xaxis_title_font=dict(color='#a7269e'),
+            yaxis_title_font=dict(color='#a7269e')
+        )
+        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                          hoverlabel_font_color="#F500E6")
+        fig.update_traces(marker_color='#d450b0')
+        with col2.expander(f"{brand} brand in {state_selected} {option} Over The Years "):
+             st.plotly_chart(fig, theme=None, use_container_width=True)
+
+    elif option == "App Opens":
+        query = f"select year , sum(agg_users_appopens) from public.aggregated_user where  agg_users_brand = 'Vivo' and state = 'tamil-nadu' group by year order by year  asc"
+        cursor.execute(query)
+        res = [i for i in cursor.fetchall()]
+        df = pd.DataFrame(res,columns=['Year','App Opens'])
+        fig = px.line(df, x="Year", y="App Opens", markers='D')
+        fig.update_layout(title_x=1)
+        fig.update_layout(
+            plot_bgcolor='#0E1117',
+            paper_bgcolor='#0E1117',
+            xaxis_title_font=dict(color='#a7269e'),
+            yaxis_title_font=dict(color='#a7269e')
+        )
+        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                          hoverlabel_font_color="#F500E6")
+        fig.update_traces(marker_color='#d450b0')
+
+        with col2.expander(f"{brand} brand in {state_selected} {option} Over The Year"):
+             st.plotly_chart(fig, theme=None, use_container_width=True)
+
+
+
+    # 3) State - wise Brand Engagement of Ao/Ru
+    if option == "Registered Users":
+        query = f"select state , sum(registered_users) as val from public.aggregated_user where year = '{year}' and quater = {q} and agg_users_brand = '{brand}' group by state order by val desc limit 10;"
+        cursor.execute(query)
+        res = [i for i in cursor.fetchall()]
+        df = pd.DataFrame(res,columns=['State','Registered Users'])
+
+        fig = px.bar(df, x="State", y="Registered Users")
+        fig.update_layout(title_x=1)
+        fig.update_layout(
+            plot_bgcolor='#0E1117',
+            paper_bgcolor='#0E1117',
+            xaxis_title_font=dict(color='#a7269e'),
+            yaxis_title_font=dict(color='#a7269e')
+        )
+        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                          hoverlabel_font_color="#F500E6")
+        fig.update_traces(marker_color='#d450b0')
+        with col3.expander(f"{brand} Brand {option} Over The Year {year} In India States "):
+            st.plotly_chart(fig, theme=None, use_container_width=True)
+    elif option == 'App Opens':
+
+        query = f"select state , sum(agg_users_appopens) as val from public.aggregated_user where year = '{year}' and quater = {q} and agg_users_brand = '{brand}' group by state order by val desc limit 10;"
+        cursor.execute(query)
+        res = [i for i in cursor.fetchall()]
+        df = pd.DataFrame(res, columns=['State', 'App opens'])
+
+        fig = px.bar(df, x="State", y="App opens")
+        fig.update_layout(title_x=1)
+        fig.update_layout(
+            plot_bgcolor='#0E1117',
+            paper_bgcolor='#0E1117',
+            xaxis_title_font=dict(color='#a7269e'),
+            yaxis_title_font=dict(color='#a7269e')
+        )
+        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                          hoverlabel_font_color="#F500E6")
+        fig.update_traces(marker_color='#d450b0')
+        with col3.expander(f"{brand} Brand {option} Over The Year {year} In India States "):
+            st.plotly_chart(fig, theme=None, use_container_width=True)
+    st.write("")
+    st.write('')
+    st.write("")
+    st.write('')
+    st.write("")
+    st.write('')
+   #_____________________________________________________________________________________________________________________________________________________________
+    col1,col2,col3 = st.columns([30,100,1])
+    col2.header(":violet[Top 10 Brands By Registered Users in State]")
+    st.write("")
+
+    # 4) Top 10 brand in each state
+
+    col1, col2, col3 = st.columns([1, 100, 1])
+    query = f"select agg_users_brand , sum(agg_users_count) as val  from public.aggregated_user where year = '{year}' and quater = {q} and state = '{state_selected}' group by agg_users_brand order by val desc limit 10"
     cursor.execute(query)
     res = [i for i in cursor.fetchall()]
     df = pd.DataFrame(res,columns=['Brand','Registered Users'])
+
     fig = px.bar(df, x="Brand", y="Registered Users")
     fig.update_layout(title_x=1)
     fig.update_layout(
@@ -353,32 +441,10 @@ elif selected == "User Brand Analysis":
     fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
                       hoverlabel_font_color="#F500E6")
     fig.update_traces(marker_color='#d450b0')
-    with col1.expander("Top 10 Brand Registered Users By State"):
-         st.plotly_chart(fig, theme=None, use_container_width=True)
-
-    #______________________________________________________________________________________________________________________________________________________________________________
-
-    # 2) Top 10 States By brand
-
-    query_1 = f"select state,sum(agg_users_count) as val from public.aggregated_user where year = '{year}'  and quater = {q} and agg_users_brand = '{brand}' group by state order by val desc limit 10;"
-
-    cursor.execute(query_1)
-    res = [i for i in cursor.fetchall()]
-    df = pd.DataFrame(res, columns=['State', 'Registered Users'])
-    fig = px.bar(df, x="State", y="Registered Users")
-    fig.update_layout(title_x=1)
-    fig.update_layout(
-        plot_bgcolor='#0E1117',
-        paper_bgcolor='#0E1117',
-        xaxis_title_font=dict(color='#a7269e'),
-        yaxis_title_font=dict(color='#a7269e')
-    )
-    fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                      hoverlabel_font_color="#F500E6")
-    fig.update_traces(marker_color='#d450b0')
-    with col2.expander("Top 10 States Registered Users By Brand"):
+    with col2.expander(f"Top 10 Brands By Registered Users In  {state_selected} In The Year  {year} And {q}th Quater  "):
         st.plotly_chart(fig, theme=None, use_container_width=True)
-#_______________________________________________________________________________________________________________________________________________________________________________________________
+
+#____________________________________________________________________________________________________
 
 elif selected == "SDP Analysis":
 
@@ -1792,3 +1858,5 @@ elif selected == 'View Data Source':
         st.dataframe(df)
 
 #____________________________________________________________________________________________________________________________________________________________________________________________________
+elif selected == "":
+    pass
