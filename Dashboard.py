@@ -45,8 +45,8 @@ with st.sidebar:     # Navbar
 
     selected = option_menu(
                                menu_title="Phonepe Pulse",
-                               options=['Intro','View Data Source','Transaction Type Analysis',"User Brand Analysis","SDP Analysis",'Time-based Analysis','Insights'],
-                               icons = ['mic-fill',"database-fill",'coin','person-circle','geo-alt-fill','hourglass-split','clipboard-data-fill'],
+                               options=['View Data Source','Transaction Type Analysis',"User Brand Analysis","SDP Analysis",'Time-based Analysis','Insights'],
+                               icons = ["database-fill",'coin','person-circle','geo-alt-fill','hourglass-split','clipboard-data-fill'],
                                menu_icon='alexa',
                                default_index=0,
                            )
@@ -58,7 +58,7 @@ with st.sidebar:     # Navbar
 
 if selected == "Transaction Type Analysis":
 
-        col1, col2 ,col3 , col4 , col5 ,col6= st.columns([6,7,8,8,7,7])
+        col1, col2 ,col3 , col4 , col5 ,col6= st.columns([7,8,8,8,7,7])
 
         st.markdown("<style>div.block-container{padding-top:3rem;}</style>", unsafe_allow_html=True)
 
@@ -199,7 +199,8 @@ if selected == "Transaction Type Analysis":
 elif selected == "User Brand Analysis":
 
 
-    col1, col2, col3,col5 = st.columns([7, 7, 7,6])
+
+    col1, col2, col3,col5 = st.columns([5, 5, 5,8])
 
     st.markdown("<style>div.block-container{padding-top:3rem;}</style>", unsafe_allow_html=True)
 
@@ -254,7 +255,7 @@ elif selected == "User Brand Analysis":
 
     total_reg_user = [i[0] for i in cursor.fetchall()]
 
-    with col2.expander(":violet[Total (RU)  Year-Wise]"):
+    with col2.expander(":violet[Total Registered users]"):
       st.metric('',f'{math.ceil((total_reg_user[0]/100000)/10)}M', delta=int(total_reg_user[0]))
 
 
@@ -267,7 +268,7 @@ elif selected == "User Brand Analysis":
 
     total_app_opens = [i[0] for i in cursor.fetchall()]
 
-    with col3.expander(':violet[USER APPOPENS (Y)]'):
+    with col3.expander(':violet[USER APPOPENS]'):
       st.metric('',f'{math.ceil((total_app_opens[0]/100000)/10)}M' , delta=int(total_app_opens[0]))
 
     st.write("")
@@ -287,7 +288,7 @@ elif selected == "User Brand Analysis":
     st.write("")
     st.write("")
 
-    col1,col2 ,col3= st.columns([8,7,8])
+    col1,col2 ,col3= st.columns([8,8,8])
 
     # 1 ) Quater  and appopens and RU in (filter year , state , year )
 
@@ -348,6 +349,8 @@ elif selected == "User Brand Analysis":
         fig.update_traces(marker_color='#d450b0')
         with col2.expander(f"{brand} brand in {state_selected} {option} Over The Years "):
              st.plotly_chart(fig, theme=None, use_container_width=True)
+             st.write('')
+             st.write('')
 
     elif option == "App Opens":
         query = f"select year , sum(agg_users_appopens) from public.aggregated_user where  agg_users_brand = 'Vivo' and state = 'tamil-nadu' group by year order by year  asc"
@@ -368,6 +371,8 @@ elif selected == "User Brand Analysis":
 
         with col2.expander(f"{brand} brand in {state_selected} {option} Over The Year"):
              st.plotly_chart(fig, theme=None, use_container_width=True)
+
+
 
 
 
@@ -418,8 +423,8 @@ elif selected == "User Brand Analysis":
     st.write("")
     st.write('')
    #_____________________________________________________________________________________________________________________________________________________________
-    col1,col2,col3 = st.columns([30,100,1])
-    col2.header(":violet[Top 10 Brands By Registered Users in State]")
+    col1,col2,col3 = st.columns([20,100,1])
+    col2.header(":violet[Top 10 Brands By Registered Users in State (Particular Year)]")
     st.write("")
 
     # 4) Top 10 brand in each state
@@ -443,8 +448,41 @@ elif selected == "User Brand Analysis":
     fig.update_traces(marker_color='#d450b0')
     with col2.expander(f"Top 10 Brands By Registered Users In  {state_selected} In The Year  {year} And {q}th Quater  "):
         st.plotly_chart(fig, theme=None, use_container_width=True)
+    st.write("")
+    st.write("")
+    st.write("")
 
-#____________________________________________________________________________________________________
+
+    #__________________________________________________________________________________________________________________________________________________________________________________________
+
+    col1, col2, col3 = st.columns([20, 100, 1])
+    col2.header(":violet[Top 10 Brands By Registered Users in State  From 2018 to 2022]")
+    st.write("")
+
+    # 4) Top 10 brand in each state
+
+    col1, col2, col3 = st.columns([1, 100, 1])
+    query = f"select year, agg_users_brand , sum(agg_users_count) as val  from public.aggregated_user where  state = '{state_selected}'  and agg_users_brand != 'Not Mentioned' group by agg_users_brand , year order by  year "
+    cursor.execute(query)
+    res = [i for i in cursor.fetchall()]
+    df = pd.DataFrame(res, columns=['Year','Brand', 'Registered Users'])
+
+    fig = px.bar(df, x="Brand", y="Registered Users",animation_frame="Year", color_discrete_sequence=[ '#eb8adb','#CA8DE1','#a7269e' ])
+    fig.update_layout(title_x=1)
+    fig.update_layout(
+        plot_bgcolor='#0E1117',
+        paper_bgcolor='#0E1117',
+        xaxis_title_font=dict(color='#a7269e'),
+        yaxis_title_font=dict(color='#a7269e')
+    )
+    fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                      hoverlabel_font_color="#F500E6")
+    fig.update_traces(marker_color='#d450b0')
+    with col2.expander(f"Top 10 Brands By Registered Users In  {state_selected} From 2018 to 2022"):
+        st.plotly_chart(fig, theme=None, use_container_width=True)
+
+
+    #____________________________________________________________________________________________________
 
 elif selected == "SDP Analysis":
 
@@ -506,7 +544,7 @@ elif selected == "SDP Analysis":
         cursor.execute(query)
         res1=[i[1] for i in cursor.fetchall()]
         with col1.expander(":violet[Top State By Amount]"):
-            st.metric("",value=res[0],delta=math.ceil(res1[0]))
+            st.metric("",value=res[0],delta=f"{round(((res1[0]/100000)/10),2)}M")
 
         #________________________________________________________________________________________________________________________________________________________________________________________
 
@@ -518,7 +556,7 @@ elif selected == "SDP Analysis":
         cursor.execute(Query)
         res1 = [i[1] for i in cursor.fetchall()]   # Count
         with col2.expander(":violet[Top State By Count]"):
-            st.metric("", value=res[0], delta=math.ceil(res1[0]))
+            st.metric("", value=res[0], delta=f"{round(((res1[0]/100000)/10),2)}M")
 
         #______________________________________________________________________________________________________________________________________________________________________________________________
 
@@ -531,7 +569,7 @@ elif selected == "SDP Analysis":
         cursor.execute(Query_1)
         res1 = [i[1] for i in cursor.fetchall()]  # Count
         with col3.expander(":violet[Current State By Amount]"):
-            st.metric("", value=res[0], delta=math.ceil(res1[0]))
+            st.metric("", value=res[0], delta=f"{round(((res1[0]/100000)/10),2)}M")
 
         #_______________________________________________________________________________________________________________________________________________________________________________________________________
 
@@ -544,7 +582,7 @@ elif selected == "SDP Analysis":
             cursor.execute(Query_1)
             res1 = [i[1] for i in cursor.fetchall()]  # Count
             with col4.expander(":violet[Current State By Count]"):
-                st.metric("", value=res[0], delta=math.ceil(res1[0]))
+                st.metric("", value=res[0], delta=f"{round(((res1[0]/100000)/10),2)}M")
 
         #____________________________________________________________________________________________________________________________________________________________________________________________________
 
@@ -697,7 +735,7 @@ elif selected == "SDP Analysis":
         cursor.execute(query)
         res1 = [i[1] for i in cursor.fetchall()]
         with col1.expander(":violet[Top District By Amount]"):
-            st.metric("", value=res[0], delta=math.ceil(res1[0]))
+            st.metric("", value=res[0], delta=f"{round(((res1[0]/100000)/10),2)}M")
 
         # ________________________________________________________________________________________________________________________________________________________________________________________
 
@@ -709,7 +747,7 @@ elif selected == "SDP Analysis":
         cursor.execute(Query)
         res1 = [i[1] for i in cursor.fetchall()]  # Count
         with col2.expander(":violet[Top State By Count]"):
-            st.metric("", value=res[0], delta=math.ceil(res1[0]))
+            st.metric("", value=res[0], delta=f"{round(((res1[0]/100000)/10),2)}M")
 
         # ______________________________________________________________________________________________________________________________________________________________________________________________
 
@@ -723,7 +761,7 @@ elif selected == "SDP Analysis":
         cursor.execute(Query_1)
         res1 = [i[1] for i in cursor.fetchall()]  # Count
         with col3.expander(":violet[Current District By Amount]"):
-            st.metric("", value=res[0], delta=math.ceil(res1[0]))
+            st.metric("", value=res[0], delta=f"{round(((res1[0]/100000)/10),2)}M")
 
         # _____________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
@@ -736,7 +774,7 @@ elif selected == "SDP Analysis":
         cursor.execute(Query_1)
         res1 = [i[1] for i in cursor.fetchall()]  # Count
         with col4.expander(":violet[Current State By Count]"):
-            st.metric("", value=res[0], delta=math.ceil(res1[0]))
+            st.metric("", value=res[0], delta=f"{round(((res1[0]/100000)/10),2)}M")
 
         #_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
@@ -2213,19 +2251,6 @@ elif selected == "Time-based Analysis":
     st.write("")
     st.write("")
 #_________________________________________________________________________________________________________________________________________________________________________________________________________________________
-
-elif selected == "Intro":
-
-    col1,col2,col3 = st.columns([14,100,10] )
-    col2.title(":violet[Phonepe Pulse] Data :violet[Visualization] and :violet[Exploration]")
-    col2.write("")
-    col2.write("")
-    col2.write("")
-    col2.write("")
-    col2.subheader('In this project we would extract the json data from [Phonepe Pulse Github Repository](https://github.com/PhonePe/pulse). After we would clean and transform the data then store it in relational database.')
-    col2.subheader("Using SQL data we analysis and create Easy-to-understand visuals and dashboards to make the conclusions about data.")
-
-
 
 
 
