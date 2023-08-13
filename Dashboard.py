@@ -22,7 +22,17 @@ import plotly.graph_objects as go
 
 from streamlit_vertical_slider import vertical_slider
 
+from streamlit_extras import *
+
+from streamlit_extras.metric_cards import style_metric_cards
+
 import math
+
+from streamlit_card import card
+
+from streamlit_extras.colored_header import colored_header
+
+from streamlit_extras.stoggle import stoggle
 #____________________________________________________________________________________________________________________________________________________________________________
 
 # POSTGRESQL CONNECTIVITY
@@ -45,117 +55,97 @@ with st.sidebar:     # Navbar
 
     selected = option_menu(
                                menu_title="Phonepe Pulse",
-                               options=['View Data Source','Transaction Type Analysis',"User Brand Analysis","SDP Analysis",'Time-based Analysis','Insights'],
-                               icons = ["database-fill",'coin','person-circle','geo-alt-fill','hourglass-split','clipboard-data-fill'],
+                               options=['Intro','View Data Source','Transaction Type Analysis',"User Brand Analysis","SDP Analysis",'Time-based Analysis','Insights'],
+                               icons = ['mic-fill',"database-fill",'coin','person-circle','geo-alt-fill','hourglass-split','clipboard-data-fill'],
                                menu_icon='alexa',
                                default_index=0,
                            )
 
 #__________________________________________________________________________________________________________________________________________________________________________________________---
-
                                                                  #________________________________________Condition_____________________________________#
-
-
 if selected == "Transaction Type Analysis":
-
-        col1, col2 ,col3 , col4 , col5 ,col6= st.columns([7,8,8,8,7,7])
-
+        col1, col2 ,col3 , col4  ,col6= st.columns([8,8,8,8,8])
         st.markdown("<style>div.block-container{padding-top:3rem;}</style>", unsafe_allow_html=True)
 
-
         # FILTERS
-
 
         # 1) state
 
         cursor.execute('select distinct(state) from public.map_transaction order by state desc')
         state_names = [i[0] for i in cursor.fetchall()]  # State Names
-        with col5.expander(':violet[FILTER]'):
-
-             state_selected = st.selectbox(':violet[CHOOSE STATE]', state_names)
-             st.write("")
-
 
         # 2) year
 
         cursor.execute('select distinct(year) from public.top_user_pincode order by year asc')
         y_values = [i[0] for i in cursor.fetchall()]
 
-
         # 3) Quater
 
         cursor.execute('select distinct(quater) from public.aggregated_transaction order by quater asc')
         q_values = [i[0] for i in cursor.fetchall()]
 
-
         # Year , Quater Combined
-        col6.write("")
-        with col6.expander(":violet[FILTER]"):
-            year = st.select_slider(':violet[CHOOSE YEAR]', options=y_values)
-        with col6.expander(':violet[FILTER]'):
-            q = st.select_slider(':violet[CHOOSE QUATER]', options=q_values)
+        with col6.expander("FILTER"):
+            year = st.select_slider('CHOOSE YEAR', options=y_values)
+            q = st.select_slider('CHOOSE QUATER', options=q_values)
 
-
-
-        # State Name
-
-        with col1.expander(":violet[State]"):
+        with col6.expander("FILTER"):
+            state_selected = st.selectbox('CHOOSE STATE', state_names)
+            option = st.selectbox("CHOOSE VALUE", ['Transaction Amount', 'Transaction Count'])
+            query = "select distinct(agg_transaction_type) from public.aggregated_transaction"
+            cursor.execute(query)
+            res = [i[0] for i in cursor.fetchall()]
+            type_selected = st.selectbox("Choose Transaction Type", res)
             st.write("")
-            st.subheader(state_selected)
-            st.write("")
-
-            st.markdown("<style>div.block-container{padding-top:4rem;}</style>", unsafe_allow_html=True)
+            order = st.selectbox('CHOOSE ORDER',['Top 10','Bottom 10'])
 
 
+        #____________________________________________________________________________________________________________________________________________
 
-#______________________________________________________________________________________________________________________________________________________________________________
-
+        #_______________________________________________________________________________________________________________________________________________________________
 
                                                                       #__________METRICS __________#
 
         # Metrics 1 : Total Transaction Count
-
         query_1 = f"select sum(map_transaction_count) from public.map_transaction where year = '{year}' and quater = {q} and state = '{state_selected}' group by state"
         cursor.execute(query_1)
         total_transaction_count = [int(i[0]) for i in cursor.fetchall()]
-        with col2.expander(":violet[Transaction count]"):
-            st.metric(label="", value=f"{round(((total_transaction_count[0]/100000)/10),2)}M",
-                        delta=total_transaction_count[0])
-
-        #_________________________________________________________________________________________________________________________________________________________________
+        col1.metric(label="Transaction count", value=f"{round(((total_transaction_count[0]/100000)/10),2)}M",
+                      delta=total_transaction_count[0])
+        #________________________________________________________________________________________________________________________________________________________________
 
         # Metrics 2 : Total Transaction Amount
-
-
         query_2 = f"select sum(map_transaction_amount) from public.map_transaction where year = '{year}' and quater = {q} and state = '{state_selected}' group by state"
         cursor.execute(query_2)
         total_transaction_amount = [int(i[0]) for i in cursor.fetchall()]
-        with col3.expander(":violet[Transaction Amount]"):
-            st.metric(label="", value=f"{round(((total_transaction_amount[0]/100000)/10),2)}M",
+        col2.metric(label="Transaction Amount", value=f"{round(((total_transaction_amount[0]/100000)/10),2)}M",
                     delta=total_transaction_amount[0])
-
         #__________________________________________________________________________________________________________________________________________________________________
 
-        # Metrics 3 : Avg Transaction count
+        # Metrics 3 : Avg Transaction Amount
 
         query_1 = f"select avg(map_transaction_amount) from public.map_transaction where year = '{year}' and quater = {q} and state = '{state_selected}' group by state"
         cursor.execute(query_1)
         total_transaction_count = [int(i[0]) for i in cursor.fetchall()]
-        with col4.expander(":violet[Average Amount]"):
-           st.metric(label="", value=f"{round(((total_transaction_count[0]/100000)/10),2)}M",
+
+        col4.metric(label="Average Transaction Amount", value=f"{round(((total_transaction_count[0]/100000)/10),2)}M",
                     delta=total_transaction_count[0]/100)
 
+        #_________________________________________________________________________________________________________________________________________________
+        # Metrics 4 : Avg Transaction count
+
+        query_1 = f"select avg(map_transaction_count) from public.map_transaction where year = '{year}' and quater = {q} and state = '{state_selected}' group by state"
+        cursor.execute(query_1)
+        total_transaction_count = [int(i[0]) for i in cursor.fetchall()]
+
+        col3.metric(label="Average Transaction Count", value=f"{round(((total_transaction_count[0] / 100000) / 10), 2)}M",
+                    delta=total_transaction_count[0] / 100)
+        style_metric_cards(
+            border_left_color='#08EED2',
+            background_color='#0E1117', border_color="#0E1117")
 #___________________________________________________________________________________________________________________________________________________________________
 
                                                                       #____________CHARTS___________#
-
-
-        c1,c2,c3 = st.columns([4,8,2])
-
-        c2.title(":violet[Transaction Type Analysis]")  # Title
-        c2.write("")
-        c2.write("")
-
         #______________________________________________________________________________________________________________________________________________________________________
 
         col1 , col2 = st.columns([10,10])
@@ -168,18 +158,14 @@ if selected == "Transaction Type Analysis":
         cursor.execute(query_3)
         total_transaction_type_by_amount = [i for i in cursor.fetchall()]
         df = pd.DataFrame(total_transaction_type_by_amount, columns=['Transaction Type',"Transaction Count"])
-        pie = px.pie(df, names='Transaction Type', values='Transaction Count', hole=0.6,color_discrete_sequence=['#6a0578', '#a7269e', '#d450b0', '#eb8adb','#CA8DE1' ])   # change color
+        pie = px.pie(df, names='Transaction Type', values='Transaction Count', hole=0.6,color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 ', '#B5EEE2 ','#51B9A3 ' ])   # change color
         pie.update_traces(textposition='outside')
         pie.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                          hoverlabel_font_color="#F500E6")
-        with col1.expander("Total Transaction Count By Transaction Type"):
+                          hoverlabel_font_color="#0DF0D4")
+        with col1.expander(f"Total Transaction Count By Transaction Type In {state_selected} "):
 
              st.plotly_chart(pie, theme=None, use_container_width=True)
-
-
         #______________________________________________________________________________________________________________________________________________________________________
-
-
 
         # Pie 2 : Total Transaction Type By Amount
 
@@ -187,15 +173,204 @@ if selected == "Transaction Type Analysis":
         cursor.execute(query_3)
         total_transaction_type_by_amount = [i for i in cursor.fetchall()]
         df = pd.DataFrame(total_transaction_type_by_amount, columns=['Transaction Type',"Transaction Amount"])
-        pie = px.pie(df, names='Transaction Type', values='Transaction Amount', hole=0.6,color_discrete_sequence=['#6a0578', '#a7269e', '#d450b0', '#eb8adb','#CA8DE1' ])   # change color
+        pie = px.pie(df, names='Transaction Type', values='Transaction Amount', hole=0.6,color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 ', '#B5EEE2 ','#51B9A3 ' ])   # change color
         pie.update_traces(textposition='outside')
         pie.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                          hoverlabel_font_color="#F500E6")
-        with col2.expander("Total Transaction Amount By Transaction Type"):
+                          hoverlabel_font_color="#0DF0D4")
+        with col2.expander(f"Total Transaction Amount By Transaction Type In {state_selected}"):
 
              st.plotly_chart(pie, theme=None, use_container_width=True)
-#_______________________________________________________________________________________________________________________________________________________________________________________________
 
+
+        #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        # 3D - Charts :
+
+        # col1, col2, col3 = st.columns([1, 200, 1])
+        if option == 'Transaction Count':
+            query = f"select state , agg_transaction_type , agg_transaction_count,year ,quater from public.aggregated_transaction where state = '{state_selected}'order by year"
+            cursor.execute(query)
+            res = [i for i in cursor.fetchall()]
+            df = pd.DataFrame(res, columns=['State','Transaction Type', 'Transaction Count', 'Year','Quater'])
+
+            fig = px.bar(df, x="Transaction Type", y="Transaction Count", animation_frame="Year",hover_name='State',
+                         color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 '])
+            fig.update_layout(title_x=1)
+            fig.update_layout(
+                plot_bgcolor='#0E1117',
+                paper_bgcolor='#0E1117',
+                xaxis_title_font=dict(color='#0DF0D4'),
+                yaxis_title_font=dict(color='#0DF0D4')
+            )
+            fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                          hoverlabel_font_color="#0DF0D4")
+
+            with st.expander(f"{option} Of {state_selected} From 2018 To 2022"):
+                st.plotly_chart(fig, theme=None, use_container_width=True)
+        elif option == 'Transaction Amount':
+            query = f"select state , agg_transaction_type , agg_transaction_amount,year ,quater from public.aggregated_transaction where state = '{state_selected}'order by year"
+            cursor.execute(query)
+            res = [i for i in cursor.fetchall()]
+            df = pd.DataFrame(res, columns=['State','Transaction Type', 'Transaction Amount', 'Year','Quater'])
+
+            fig = px.bar(df, x="Transaction Type", y="Transaction Amount", animation_frame="Year",hover_name='State',
+                         color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 '])
+            fig.update_layout(title_x=1)
+            fig.update_layout(
+                plot_bgcolor='#0E1117',
+                paper_bgcolor='#0E1117',
+                xaxis_title_font=dict(color='#0DF0D4'),
+                yaxis_title_font=dict(color='#0DF0D4')
+            )
+            fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                          hoverlabel_font_color="#0DF0D4")
+
+            with st.expander(f"{option} Of {state_selected} From 2018 TO 2022"):
+                st.plotly_chart(fig, theme=None, use_container_width=True)
+
+        #________________________________________________________________________________________________________________________________________________________________________
+
+        # # Top / Bottom 10 states By transaction Type filter year option
+        if option == "Transaction Count":
+            if order  == 'Top 10':
+                query = f"select state , sum(agg_transaction_count) as val,agg_transaction_type   from public.aggregated_transaction where  year = '{year}' and quater = {q} and agg_transaction_type ='{type_selected}' group by state,agg_transaction_type order by val desc limit 10"
+                cursor.execute(query)
+                res = [i for i in cursor.fetchall()]
+                df = pd.DataFrame(res, columns=['State', 'Transaction Count',"Transaction Type"])
+
+                fig = px.bar(df, x="State", y="Transaction Count",hover_name='Transaction Type',
+                             color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 '])
+                fig.update_layout(title_x=1)
+                fig.update_layout(
+                    plot_bgcolor='#0E1117',
+                    paper_bgcolor='#0E1117',
+                    xaxis_title_font=dict(color='#0DF0D4'),
+                    yaxis_title_font=dict(color='#0DF0D4')
+                )
+                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                  hoverlabel_font_color="#0DF0D4")
+
+                with st.expander(f"{order} States By {option} In year {year}"):
+                    st.plotly_chart(fig, theme=None, use_container_width=True)
+            elif order == 'Bottom 10':
+                query = f"select state , sum(agg_transaction_count) as val,agg_transaction_type   from public.aggregated_transaction where  year = '{year}' and quater = {q} and agg_transaction_type ='{type_selected}' group by state,agg_transaction_type order by val limit 10"
+                cursor.execute(query)
+                res = [i for i in cursor.fetchall()]
+                df = pd.DataFrame(res, columns=['State', 'Transaction Count', "Transaction Type"])
+
+                fig = px.bar(df, x="State", y="Transaction Count", hover_name='Transaction Type',
+                             color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 '])
+                fig.update_layout(title_x=1)
+                fig.update_layout(
+                    plot_bgcolor='#0E1117',
+                    paper_bgcolor='#0E1117',
+                    xaxis_title_font=dict(color='#0DF0D4'),
+                    yaxis_title_font=dict(color='#0DF0D4')
+                )
+                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                  hoverlabel_font_color="#0DF0D4")
+
+                with st.expander(f"{order} States By {option} In year {year}"):
+                    st.plotly_chart(fig, theme=None, use_container_width=True)
+
+        elif option == "Transaction Amount":
+            if order  == 'Top 10':
+                query = f"select state , sum(agg_transaction_amount) as val,agg_transaction_type   from public.aggregated_transaction where  year = '{year}' and quater = {q} and agg_transaction_type ='{type_selected}' group by state,agg_transaction_type order by val desc limit 10"
+                cursor.execute(query)
+                res = [i for i in cursor.fetchall()]
+                df = pd.DataFrame(res, columns=['State', 'Transaction Amount',"Transaction Type"])
+
+                fig = px.bar(df, x="State", y="Transaction Amount",hover_name='Transaction Type',
+                             color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 '])
+                fig.update_layout(title_x=1)
+                fig.update_layout(
+                    plot_bgcolor='#0E1117',
+                    paper_bgcolor='#0E1117',
+                    xaxis_title_font=dict(color='#0DF0D4'),
+                    yaxis_title_font=dict(color='#0DF0D4')
+                )
+                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                  hoverlabel_font_color="#0DF0D4")
+
+                with st.expander(f"{order} States By {option} In year {year}"):
+                    st.plotly_chart(fig, theme=None, use_container_width=True)
+            elif order == 'Bottom 10':
+                query = f"select state , sum(agg_transaction_amount) as val,agg_transaction_type   from public.aggregated_transaction where  year = '{year}' and quater = {q} and agg_transaction_type ='{type_selected}' group by state,agg_transaction_type order by val limit 10"
+                cursor.execute(query)
+                res = [i for i in cursor.fetchall()]
+                df = pd.DataFrame(res, columns=['State', 'Transaction Amount', "Transaction Type"])
+
+                fig = px.bar(df, x="State", y="Transaction Amount", hover_name='Transaction Type',
+                             color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 '])
+                fig.update_layout(title_x=1)
+                fig.update_layout(
+                    plot_bgcolor='#0E1117',
+                    paper_bgcolor='#0E1117',
+                    xaxis_title_font=dict(color='#0DF0D4'),
+                    yaxis_title_font=dict(color='#0DF0D4')
+                )
+                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                  hoverlabel_font_color="#0DF0D4")
+
+                with st.expander(f"{order} States By {option} In year {year}"):
+                    st.plotly_chart(fig, theme=None, use_container_width=True)
+        # #_______________________________________________________________________________________________________________________________________________________________________________________
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")  # #262730
+
+        colored_header(
+            label="CONCLUSION",
+            description="Financial and Other services had lower level in Both Transaction Count and Amount",
+            color_name="blue-green-70",
+        )
+        #____________________________________________________________________________________________________________________________________________________________________'
+
+        if st.button("Click Me"):
+            if option == "Transaction Count":
+                query = f"select sum(agg_transaction_count) as val,agg_transaction_type   from public.aggregated_transaction  group by agg_transaction_type order by val "
+                cursor.execute(query)
+                res = [i for i in cursor.fetchall()]
+                df = pd.DataFrame(res, columns=['Transaction Count', 'Transaction Type'])
+
+                fig = px.bar(df, x="Transaction Type", y="Transaction Count", hover_name='Transaction Type',
+                             color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 '])
+                fig.update_layout(title_x=1)
+                fig.update_layout(
+                    plot_bgcolor='#0E1117',
+                    paper_bgcolor='#0E1117',
+                    xaxis_title_font=dict(color='#0DF0D4'),
+                    yaxis_title_font=dict(color='#0DF0D4')
+                )
+                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                  hoverlabel_font_color="#0DF0D4")
+
+                with st.expander(f"Which Transaction Type  had  lower {option}?"):
+                    st.plotly_chart(fig, theme=None, use_container_width=True)
+            elif option == 'Transaction Amount':
+                query = f"select sum(agg_transaction_amount) as val,agg_transaction_type   from public.aggregated_transaction  group by agg_transaction_type order by val "
+                cursor.execute(query)
+                res = [i for i in cursor.fetchall()]
+                df = pd.DataFrame(res, columns=['Transaction Amount', 'Transaction Type'])
+
+                fig = px.bar(df, x="Transaction Type", y="Transaction Amount", hover_name='Transaction Type',
+                             color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 '])
+                fig.update_layout(title_x=1)
+                fig.update_layout(
+                    plot_bgcolor='#0E1117',
+                    paper_bgcolor='#0E1117',
+                    xaxis_title_font=dict(color='#0DF0D4'),
+                    yaxis_title_font=dict(color='#0DF0D4')
+                )
+                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                  hoverlabel_font_color="#0DF0D4")
+
+                with st.expander(f"Which  Transaction Type had  lower {option}?"):
+                    st.plotly_chart(fig, theme=None, use_container_width=True)
+
+
+#_______________________________________________________________________________________________________________________________________________________________________________________________
 elif selected == "User Brand Analysis":
 
 
@@ -483,7 +658,7 @@ elif selected == "User Brand Analysis":
 
 
     #____________________________________________________________________________________________________
-
+#_______________________________________________________________________________________________________________________________________________________________________________________________
 elif selected == "SDP Analysis":
 
     with st.sidebar:
@@ -1822,20 +1997,19 @@ elif selected == "SDP Analysis":
 
                 with col2.expander("Top 10 Pincode By Registered Users"):
                     st.plotly_chart(pie, theme=None, use_container_width=True)
-
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 elif selected == 'View Data Source':
-
+    st.markdown("<style>div.block-container{padding-top:2rem;}</style>", unsafe_allow_html=True)
 
     selected = option_menu(
-               menu_title="Phonepe Pulse",
+               menu_title="",
                options=['Aggregated Transaction', 'Aggregated User', 'Map Transaction', "Map User",
-                        "Top trnasaction District And State", "Top Transaction Pincode",
-                        "Top user District And State", 'Top User Pincode'],
+                        "Top Transaction District And State", "Top Transaction Pincode",
+                        "Top User District And State", 'Top User Pincode'],
                icons=['table', 'table', 'table', 'table', 'table', 'table', 'table', 'table'],
                menu_icon='database-fill-check',
                default_index=0,
+               orientation='horizontal'
            )
 
     if selected == "Aggregated Transaction":
@@ -1894,8 +2068,7 @@ elif selected == 'View Data Source':
         res = [i for i in cursor.fetchall()]
         df = pd.DataFrame(res, columns=['state',	'year','quater'	,'top_user_pincode','top_registered_users'])
         st.dataframe(df)
-
-#____________________________________________________________________________________________________________________________________________________________________________________________________
+#________________________________________________________________________________________________________________________________________________________________________________________________
 elif selected == "Time-based Analysis":
 
     c1,c2,c3 = st.columns([50,100,1])
@@ -2251,7 +2424,6 @@ elif selected == "Time-based Analysis":
     st.write("")
     st.write("")
 #_________________________________________________________________________________________________________________________________________________________________________________________________________________________
-
 
 
 
