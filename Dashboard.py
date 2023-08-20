@@ -53,7 +53,7 @@ from streamlit_extras.keyboard_url import keyboard_to_url
 from streamlit_lottie import st_lottie
 
 import requests as rs
-from fontawesome import icons
+
 #____________________________________________________________________________________________________________________________________________________________________________
 
 # POSTGRESQL CONNECTIVITY
@@ -3151,7 +3151,52 @@ elif selected == "Time-based Analysis":
         color_name="blue-green-70", )
 #________________________________________________________________________________________________________________________________________________________________________________________________________________________
 elif selected == 'GeoGraphical Analysis':
-     pass
+
+    Map_transaction_df = pd.read_csv('map_transaction.csv')
+
+    a_t2 = Map_transaction_df[['state', 'map_transaction_amount']]
+    a_t2 = a_t2.sort_values(by='state')
+    url = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson"
+    response = rs.get(url)
+    data1 = js.loads(response.content)
+    print(data1)
+    state_names_tra = [feature['properties']['ST_NM'] for feature in data1['features']]
+    state_names_tra.sort()
+
+    df_state_names_tra = pd.DataFrame({'state': state_names_tra})
+
+    a_t2['state'] = a_t2['state'].str.replace('-', ' ')
+    a_t2['state'] = a_t2['state'].str.replace('Dadra & Nagar Haveli & Daman & Diu',
+                                              'Dadra and Nagar Haveli and Daman and Diu')
+    a_t2['state'] = a_t2['state'].str.replace('Andaman & Nicobar Islands', 'Andaman & Nicobar')
+    a_t2['state'] = a_t2['state'].str.title()
+
+    merge_df = df_state_names_tra.merge(a_t2, on='state')
+
+    trans_fig = px.choropleth_mapbox(merge_df,
+                                     geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
+                                     featureidkey='properties.ST_NM', locations='state', color='map_transaction_amount',
+                                     color_continuous_scale=['#C8E2E3 ', '#12F6FF'], range_color=(0, 200000000000),
+                                     height=1000, zoom=4, center={"lat": 20.5937, "lon": 78.9629}
+                                     )
+
+    trans_fig.update_geos(fitbounds="locations", visible=False)
+    trans_fig.update_layout(title_font=dict(size=33), title_font_color='#6739b7',
+                            coloraxis_colorbar_title="Total Transaction Amount",  # Set plot background color to black
+                            paper_bgcolor='black',width=800
+
+                            )
+
+    trans_fig.update_layout(mapbox_style="open-street-map")
+    trans_fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+
+    trans_fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                            hoverlabel_font_color="#12F6FF")
+    st.plotly_chart(trans_fig,use_container_width=True, width=450)
+
+
+
+
 
 
 #____________________________________________________________________________________________________________________________________________________________________________________________________________
@@ -3250,8 +3295,7 @@ elif selected == 'Feedback':
                         for i in res:
                             print(st.code(i))
                         button(username="Praveen", floating=True, width=221,bg_color='#0BD8B0')
-                        # if st.button("Coffee"):
-                        st.write("[Praveen](https://www.linkedin.com/in/praveen-n-2b4004223/)")
+
 #_____________________________________________________________________________________________________________________________________
 elif selected =='Intro':
 
@@ -3539,4 +3583,5 @@ elif selected =='Intro':
             width=600,
             key=None
         )
-    #__________________________________________________________________________________________________________________________________________________
+    #_______________________________________________________________________FINISHED___________________________________________________________________________
+#____________________________________________________________________________________________________________________________________________________
