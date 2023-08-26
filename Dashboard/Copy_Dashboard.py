@@ -83,11 +83,18 @@ class Phonepe_pulse:
                                                                                      #________________________________________Condition_____________________________________#
                     if selected == "Transaction Type Analysis":
 
-                            colored_header(
-                            label="Transaction Type Analysis",
-                            description="",
-                            color_name="blue-green-70",)
+                        st.markdown("<style>div.block-container{padding-top:2rem;}</style>", unsafe_allow_html=True)
 
+                        explore = option_menu(
+                            menu_title="",
+                            options=['Click', 'Explore Dashboard'],
+                            icons=['arrow-right-circle-fill', 'eye-fill'],
+                            menu_icon='',
+                            default_index=0,
+                            orientation='horizontal'
+                        )
+
+                        if explore == 'Click':
                             # animation
                             def lottie(filepath):
                                 with open(filepath, 'r') as file:
@@ -102,18 +109,25 @@ class Phonepe_pulse:
                                     reverse=False,
                                     loop=True,
                                     quality='low',
-                                    # renderer='svg',
-                                    height=400,
-                                    width=500,
+                                    height=500,
+                                    width=700,
                                     key=None
                                 )
+                            col1, col2, col3 = st.columns([6, 10, 5])
+                            col2.markdown( "<h1 style='font-size: 50px;'><span style='color: cyan;'>Transaction</span> <span style='color: white;'>Type</span> <span style='color: cyan;'>Analysis</span></h1>",unsafe_allow_html=True)
+
+                        elif explore =='Explore Dashboard':
 
                             st.write("")
                             st.write("")
 
-                            st.write("")
-                            st.write("")
+                            colored_header(
+                                label="Transaction Type Analysis",
+                                description="",
+                                color_name="blue-green-70", )
 
+                            st.write("")
+                            st.write("")
 
                             col1, col2 ,col3 , col4  ,col6= st.columns([8,8,8,8,8])
                             st.markdown("<style>div.block-container{padding-top:3rem;}</style>", unsafe_allow_html=True)
@@ -434,381 +448,392 @@ class Phonepe_pulse:
                     #_______________________________________________________________________________________________________________________________________________________________________________________________
                     elif selected == "Mobile Brand Analysis":
 
-                        colored_header(
-                            label="Mobile Brand Analysis",
-                            description="",
-                            color_name="blue-green-70", )
-
-
-                        # animation
-                        def lottie(filepath):
-                            with open(filepath, 'r') as file:
-                                return js.load(file)
-
-                        col1 , col2 , col3 = st.columns([5,10,5])
-                        with col2:
-                            file = lottie("transaction type.json")
-                            st_lottie(
-                                file,
-                                speed=1,
-                                reverse=False,
-                                loop=True,
-                                quality='low',
-                                # renderer='svg',
-                                height=500,
-                                width=500,
-                                key=None
-                            )
-
-                        st.write("")
-                        st.write("")
-
-
-
-                        col1, col2, col3,col4,col5,col6 = st.columns([8,9,8,8,8,8])
-
-                        st.markdown("<style>div.block-container{padding-top:3rem;}</style>", unsafe_allow_html=True)
-
-                                                                                                 #__________FILTERS___________#
-
-
-
-                        # 1) Brand
-
-                        cursor.execute(f"select agg_users_brand from public.aggregated_user where agg_users_brand not in  ('Not Mentioned') group by agg_users_brand order by sum(agg_users_count) desc")
-                        brand_values = [i[0] for i in cursor.fetchall()]
-
-
-
-
-                        # 1) Year
-                        cursor.execute('select distinct(year) from public.top_user_pincode order by year asc')
-                        y_values = [i[0] for i in cursor.fetchall()]
-
-                        # 2) Quater
-                        cursor.execute('select distinct(quater) from public.aggregated_transaction order by quater asc')
-                        q_values = [i[0] for i in cursor.fetchall()]
-
-
-                        # 3) State
-                        cursor.execute('select distinct(state) from public.map_transaction order by state desc')
-                        state_names = [i[0] for i in cursor.fetchall()]  # State Names
-
-                        with col6.expander("FILTER"):
-                            year = st.selectbox('CHOOSE YEAR',y_values)
-                            quater = st.selectbox('CHOOSE QUATER',q_values)
-
-                        with col6.expander("FILTER"):
-                            state_selected = st.selectbox('CHOOSE STATE',state_names)
-                            selected_brand = st.selectbox('CHOOSE MOBILE BRAND', brand_values)
-                            option = st.selectbox('CHOOSE OPTION',['Registered Users','App Opens'])
-                            order = st.selectbox('CHOOSE ORDER',['Top 10','Bottom 10'])
-
-
-
-
-
-
-
-
-
-                    #_____________________________________________________________________________________________________________________________________________________________________________
-
-                                                        #_____________________________METRICS______________________#
-
-
-                        # Brand selected
-                        # col1.write("")
-                        col1.write("")
-                        col1.metric(label="Mobile Brand", value=selected_brand)
-
-                        style_metric_cards(
-                            border_left_color='#08EED2',
-                            background_color='#0E1117', border_color="#0E1117")
-
-                    #___________________________________________________________________________________________________________________________________________________________________________________
-
-                        # metrics 2: Total User Registered of selected brand :
-
-                        query_5 = f"select  sum(agg_users_count) from public.aggregated_user where agg_users_brand = '{selected_brand}' group by agg_users_brand"
-                        cursor.execute(query_5)
-                        total_reg_user = [i[0] for i in cursor.fetchall()]
-
-                        col2.metric(label="Overall Registered User", value=f'{round(((total_reg_user[0]/100000)/10),2)}M',delta=int(total_reg_user[0]))
-
-                       #_____________________________________________________________________________________________________________________________________________________________________
-
-                        # Metrices 3 : Appopens
-
-                        query_6 = f"select  sum(agg_users_percentage) from public.aggregated_user where agg_users_brand = '{selected_brand}' group by agg_users_brand"
-                        cursor.execute(query_6)
-
-                        total_app_opens = [i[0] for i in cursor.fetchall()]
-                        col3.metric(label="Overall User Engagement", value=f'{round(((total_app_opens[0]/611.9999999999987)*100),2)}%',delta=(total_app_opens[0]/611.9999999999987)*100)
-
-
-
-                       #_______________________________________________________________________________________________________________________________________________________________________________________
-
-                        # metrics 4: Total User Registered of selected brand with filter :
-
-                        query_5 = f"select  sum(agg_users_count) from public.aggregated_user where agg_users_brand = '{selected_brand}' and year = '{year}' and quater = {quater} group by agg_users_brand"
-                        cursor.execute(query_5)
-                        total_reg_user = [i[0] for i in cursor.fetchall()]
-
-                        col4.metric(label=f"Registered User In Q{quater} of {year}", value=f'{round(((total_reg_user[0] / 100000) / 10), 2)}M',delta=int(total_reg_user[0]))
-
-                       #__________________________________________________________________________________________________________________________________________________________________________________________________
-
-                        # Metrices 3 : Appopens with filter
-
-                        query_6 = f"select  sum(agg_users_percentage) from public.aggregated_user where agg_users_brand = '{selected_brand}' and year = '{year}' and quater = {quater} group by agg_users_brand"
-                        cursor.execute(query_6)
-
-                        total_app_opens = [i[0] for i in cursor.fetchall()]
-                        col5.metric(label=f"Overall UE In Q{quater} of {year}", value=f'{round(((total_app_opens[0] / 611.9999999999987) * 100), 2)}%',
-                                    delta=(total_app_opens[0] / 611.9999999999987) * 100)
-
-
-
-                    #______________________________________________________________________________________________________________________________________________________________________________
-                                                                                                     #_______CHARTS_______#
-
-
-                        col1,col2 ,col3= st.columns([8,8,8])
-
-                        # 1 ) Quater  and appopens and RU in (filter year , state , year )
-
-                        if option == "Registered Users":
-                            query = f"select quater , sum(agg_users_count) from public.aggregated_user where year = '{year}' and agg_users_brand = '{selected_brand}' and state = '{state_selected}'group by quater order by quater asc"
-                            cursor.execute(query)
-                            res = [i for i in cursor.fetchall()]
-                            df = pd.DataFrame(res,columns=['Quater','Registered Users'])
-                            fig = px.bar(df, x="Quater", y="Registered Users")
-                            fig.update_layout(title_x=1)
-                            fig.update_layout(
-                                plot_bgcolor='#0E1117',
-                                paper_bgcolor='#0E1117',
-                                xaxis_title_font=dict(color='#0DF0D4'),
-                                yaxis_title_font=dict(color='#0DF0D4')
-                            )
-                            fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                              hoverlabel_font_color="#0DF0D4")
-
-                            fig.update_traces(marker_color='#1BD4BD')
-                            with st.expander(f"In {state_selected} {selected_brand} Brand {option} In The Year Of {year}   (Quater Wise COMPARISON)"):
-                                 st.plotly_chart(fig, theme=None, use_container_width=True)
-
-                        elif option == "App Opens":
-                            query = f"select quater , sum(agg_users_appopens) from public.aggregated_user where year = '{year}' and agg_users_brand = '{selected_brand}' and state = '{state_selected}' group by quater order by quater asc"
-                            cursor.execute(query)
-                            res = [i for i in cursor.fetchall()]
-                            df = pd.DataFrame(res,columns=['Quater','App Opens'])
-                            pie = px.pie(df, names='Quater', values='App Opens', hole=0.7,
-                                         color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 ', '#B5EEE2 ', '#51B9A3 '])  # change color
-
-
-                            pie.update_traces(textposition='outside')
-                            pie.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                              hoverlabel_font_color="#0DF0D4")
-                            with st.expander(f"In {state_selected} {selected_brand} Brand {option} In The Quaters Of {year} "):
-                                 st.plotly_chart(pie, theme=None, use_container_width=True)
-                       #_________________________________________________________________________________________________________________________________________________________________________________________________________________________________
-                        # 3) State - wise Brand Engagement of Ao/Ru
-
-                        col1,col2,col3,col4,col5 = st.columns([10,8,2,8,2])
-
-                        if order == 'Top 10':
-                            if option == "Registered Users":
-                                query = f"select state , sum(agg_users_count) as val from public.aggregated_user where year = '{year}' and quater = {quater} and agg_users_brand = '{selected_brand}' group by state order by val desc limit 10;"
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res,columns=['State','Registered Users'])
-
-                                fig = px.bar(df, x="State", y="Registered Users")
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#0DF0D4'),
-                                    yaxis_title_font=dict(color='#0DF0D4')
-                                )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#0DF0D4")
-
-                                fig.update_traces(marker_color='#1BD4BD')
-                                with st.expander(f"{order} India States of {selected_brand} Brand {option} Over The Year {year}"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
-                            elif option == 'App Opens':
-
-                                query = f"select state , sum(agg_users_appopens) as val from public.aggregated_user where year = '{year}' and quater = {quater} and agg_users_brand = '{selected_brand}' group by state order by val desc limit 10;"
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res, columns=['State', 'App opens'])
-
-                                fig = px.bar(df, x="State", y="App opens")
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#0DF0D4'),
-                                    yaxis_title_font=dict(color='#0DF0D4')
-                                )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#0DF0D4")
-
-                                fig.update_traces(marker_color='#1BD4BD')
-                                with st.expander(f"{order} India States of {selected_brand} Brand {option} Over The Year {year}"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
-
-                        elif order == 'Bottom 10':
-                            if option == "Registered Users":
-                                query = f"select state , sum(agg_users_count) as val from public.aggregated_user where year = '{year}' and quater = {quater} and agg_users_brand = '{selected_brand}' group by state order by val  limit 10;"
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res,columns=['State','Registered Users'])
-
-                                fig = px.bar(df, x="State", y="Registered Users")
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#0DF0D4'),
-                                    yaxis_title_font=dict(color='#0DF0D4')
-                                )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#0DF0D4")
-
-                                fig.update_traces(marker_color='#1BD4BD')
-                                with st.expander(f"{order} India States of {selected_brand} Brand {option} Over The Year {year}"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
-                            elif option == 'App Opens':
-
-                                query = f"select state , sum(agg_users_appopens) as val from public.aggregated_user where year = '{year}' and quater = {quater} and agg_users_brand = '{selected_brand}' group by state order by val  limit 10;"
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res, columns=['State', 'App opens'])
-
-                                fig = px.bar(df, x="State", y="App opens")
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#0DF0D4'),
-                                    yaxis_title_font=dict(color='#0DF0D4')
-                                )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#0DF0D4")
-
-                                fig.update_traces(marker_color='#1BD4BD')
-                                with st.expander(f"{order} India States of {selected_brand} Brand {option} Over The Year {year}"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
-
-                        #________________________________________________________________________________________________________________________________________________________________________
-
-                        # Top 10 / bottom 10 Brand in each state
-
-                        if order == 'Top 10':
-                            if option == "Registered Users":
-                                query = f"select agg_users_brand  , sum(agg_users_count) as val from public.aggregated_user where year = '{year}' and quater = {quater} and state = '{state_selected}' group by state , agg_users_brand  order by val desc limit 10;"
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res,columns=['Mobile Brand','Registered Users'])
-
-                                fig = px.bar(df, x="Mobile Brand", y="Registered Users")
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#0DF0D4'),
-                                    yaxis_title_font=dict(color='#0DF0D4')
-                                )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#0DF0D4")
-
-                                fig.update_traces(marker_color='#1BD4BD')
-                                with st.expander(f"{order} {option} Brands In {state_selected} In The Year {year}"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
-
-
-                        elif order == 'Bottom 10':
-
-                            if option == "Registered Users":
-                                query = f"select agg_users_brand  , sum(agg_users_count) as val from public.aggregated_user where year = '{year}' and quater = {quater} and state = '{state_selected}' group by state , agg_users_brand  order by val  limit 10;"
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res,columns=['Mobile Brand','Registered Users'])
-
-                                fig = px.bar(df, x="Mobile Brand", y="Registered Users")
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#0DF0D4'),
-                                    yaxis_title_font=dict(color='#0DF0D4')
-                                )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#0DF0D4")
-
-                                fig.update_traces(marker_color='#1BD4BD')
-                                with st.expander(f"{order} {option} Brands In {state_selected} In The Year {year}"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
-
-
-                        #_____________________________________________________________________________________________________________________________________________________________________
-                        st.write("")
-                        st.write("")
-                        st.write("")
-                        st.write("")  # #262730
-
-                        colored_header(
-                            label="CONCLUSION",
-                            description="The Mobile Brands Xiaomi,Samsung,Vivo,Oppo,Others,Realme,Apple,Motorola,Oneplus,Huawei Has Higher User Engagement",
-                            color_name="blue-green-70",
+                        st.markdown("<style>div.block-container{padding-top:2rem;}</style>", unsafe_allow_html=True)
+
+                        explore_1 = option_menu(
+                            menu_title="",
+                            options=['Click', 'Explore Dashboard'],
+                            icons=['arrow-right-circle-fill', 'eye-fill'],
+                            menu_icon='',
+                            default_index=0,
+                            orientation='horizontal'
                         )
-                        # ____________________________________________________________________________________________________________________________________________________________________'
 
-                        if st.button("Click Me!"):
-                            if order == "Top 10":
-                                query = f"select agg_users_brand , sum(agg_users_count) val from public.aggregated_user where agg_users_brand != 'Not Mentioned' group by agg_users_brand order by val desc limit 10;"
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res, columns=['Mobile Brand', 'User Engagement'])
+                        if explore_1 =='Click':
+                            # animation
+                            def lottie(filepath):
+                                with open(filepath, 'r') as file:
+                                    return js.load(file)
 
-                                fig = px.pie(df, names="Mobile Brand", values="User Engagement",
-                                             color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 '])
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#0DF0D4'),
-                                    yaxis_title_font=dict(color='#0DF0D4')
+                            col1, col2, col3 = st.columns([6, 10, 5])
+                            col2.markdown(
+                                "<h1 style='font-size: 50px;'><span style='color: cyan;'>Mobile</span> <span style='color: white;'>Brand</span> <span style='color: cyan;'>Analysis</span></h1>",
+                                unsafe_allow_html=True)
+
+                            col1, col2, col3 = st.columns([3, 10, 8])
+                            with col2:
+                                file = lottie("transaction type.json")
+                                st_lottie(
+                                    file,
+                                    speed=1,
+                                    reverse=False,
+                                    loop=True,
+                                    quality='low',
+                                    # renderer='svg',
+                                    height=645,
+                                    width=800,
+                                    key=None
                                 )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#0DF0D4")
 
-                                with st.expander(f"What are the Mobile Brands has Higher User Engagement ?"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
-                            elif order == "Bottom 10":
-                                query = f"select agg_users_brand , sum(agg_users_count) val from public.aggregated_user where agg_users_brand != 'Not Mentioned' group by agg_users_brand order by val limit 10;"
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res, columns=['Mobile Brand', 'User Engagement'])
 
-                                fig = px.pie(df, names="Mobile Brand", values="User Engagement",
-                                             color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 '])
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#0DF0D4'),
-                                    yaxis_title_font=dict(color='#0DF0D4')
+                        elif explore_1 == 'Explore Dashboard':
+
+                                st.markdown("<style>div.block-container{padding-top:2rem;}</style>", unsafe_allow_html=True)
+                                st.write('')
+                                st.write("")
+                                st.write("")
+                                colored_header(
+                                label="Mobile Brand Analysis",
+                                description="",
+                                color_name="blue-green-70", )
+                                st.write("")
+                                st.write("")
+
+                                col1, col2, col3,col4,col5,col6 = st.columns([8,9,8,8,8,8])
+
+                                                                                                         #__________FILTERS___________#
+
+                                # 1) Brand
+
+                                cursor.execute(f"select agg_users_brand from public.aggregated_user where agg_users_brand not in  ('Not Mentioned') group by agg_users_brand order by sum(agg_users_count) desc")
+                                brand_values = [i[0] for i in cursor.fetchall()]
+
+                                # 3) State
+                                cursor.execute('select distinct(state) from public.map_transaction order by state desc')
+                                state_names = [i[0] for i in cursor.fetchall()]  # State Names
+
+                                with col6.expander("FILTER"):
+                                    state_selected = st.selectbox('CHOOSE STATE',state_names)
+                                    selected_brand = st.selectbox('CHOOSE MOBILE BRAND', brand_values)
+                                    option = st.selectbox('CHOOSE OPTION',['Registered Users','App Opens'])
+                                    order = st.selectbox('CHOOSE ORDER',['Top 10','Bottom 10'])
+
+                                # 1) Year
+                                cursor.execute(f"select distinct(year) from public.aggregated_user where agg_users_brand = '{selected_brand}' order  by year asc ;")
+                                y_values = [i[0] for i in cursor.fetchall()]
+
+                                with col6.expander("FILTER"):
+                                    year = st.selectbox('CHOOSE YEAR',y_values)
+                                    # 2) Quater
+                                    cursor.execute(f"select distinct(quater) from public.aggregated_user where agg_users_brand = '{selected_brand}'  and year = '{year}' order  by quater asc ;")
+                                    q_values = [i[0] for i in cursor.fetchall()]
+                                    quater = st.selectbox('CHOOSE QUATER',q_values)
+
+
+
+
+
+
+
+
+
+                            #_____________________________________________________________________________________________________________________________________________________________________________
+
+                                                                #_____________________________METRICS______________________#
+
+
+                                # Brand selected
+                                # col1.write("")
+                                col1.write("")
+                                col1.metric(label="Mobile Brand", value=selected_brand)
+
+                                style_metric_cards(
+                                    border_left_color='#08EED2',
+                                    background_color='#0E1117', border_color="#0E1117")
+
+                            #___________________________________________________________________________________________________________________________________________________________________________________
+
+                                # metrics 2: Total User Registered of selected brand :
+
+                                query_5 = f"select  sum(agg_users_count) from public.aggregated_user where agg_users_brand = '{selected_brand}' group by agg_users_brand"
+                                cursor.execute(query_5)
+                                total_reg_user = [i[0] for i in cursor.fetchall()]
+
+                                col2.metric(label="Overall Registered User", value=f'{round(((total_reg_user[0]/100000)/10),2)}M',delta=int(total_reg_user[0]))
+
+                               #_____________________________________________________________________________________________________________________________________________________________________
+
+                                # Metrices 3 : Appopens
+
+                                query_6 = f"select  sum(agg_users_percentage) from public.aggregated_user where agg_users_brand = '{selected_brand}' group by agg_users_brand"
+                                cursor.execute(query_6)
+
+                                total_app_opens = [i[0] for i in cursor.fetchall()]
+                                col3.metric(label="Overall User Engagement", value=f'{round(((total_app_opens[0]/611.9999999999987)*100),2)}%',delta=(total_app_opens[0]/611.9999999999987)*100)
+
+
+
+                               #_______________________________________________________________________________________________________________________________________________________________________________________
+
+                                # metrics 4: Total User Registered of selected brand with filter :
+
+                                query_5 = f"select  sum(agg_users_count) from public.aggregated_user where agg_users_brand = '{selected_brand}' and year = '{year}' and quater = {quater} group by agg_users_brand"
+                                cursor.execute(query_5)
+                                total_reg_user = [i[0] for i in cursor.fetchall()]
+                                val = f'{round(((total_reg_user[0] / 100000) / 10), 2)}M' if total_reg_user != None else 0
+                                col4.metric(label=f"Registered User In Q{quater} of {year}", value=val,delta=int(total_reg_user[0]))
+
+                               #__________________________________________________________________________________________________________________________________________________________________________________________________
+
+                                # Metrices 3 : Appopens with filter
+
+                                query_6 = f"select  sum(agg_users_percentage) from public.aggregated_user where agg_users_brand = '{selected_brand}' and year = '{year}' and quater = {quater} group by agg_users_brand"
+                                cursor.execute(query_6)
+
+                                total_app_opens = [i[0] for i in cursor.fetchall()]
+                                col5.metric(label=f"Overall UE In Q{quater} of {year}", value=f'{round(((total_app_opens[0] / 611.9999999999987) * 100), 2)}%',
+                                            delta=(total_app_opens[0] / 611.9999999999987) * 100)
+
+
+
+                            #______________________________________________________________________________________________________________________________________________________________________________
+                                                                                                             #_______CHARTS_______#
+
+
+                                col1,col2 ,col3= st.columns([8,8,8])
+
+                                # 1 ) Quater  and appopens and RU in (filter year , state , year )
+
+                                if option == "Registered Users":
+                                    query = f"select quater , sum(agg_users_count) from public.aggregated_user where year = '{year}' and agg_users_brand = '{selected_brand}' and state = '{state_selected}'group by quater order by quater asc"
+                                    cursor.execute(query)
+                                    res = [i for i in cursor.fetchall()]
+                                    df = pd.DataFrame(res,columns=['Quater','Registered Users'])
+                                    fig = px.bar(df, x="Quater", y="Registered Users")
+                                    fig.update_layout(title_x=1)
+                                    fig.update_layout(
+                                        plot_bgcolor='#0E1117',
+                                        paper_bgcolor='#0E1117',
+                                        xaxis_title_font=dict(color='#0DF0D4'),
+                                        yaxis_title_font=dict(color='#0DF0D4')
+                                    )
+                                    fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                      hoverlabel_font_color="#0DF0D4")
+
+                                    fig.update_traces(marker_color='#1BD4BD')
+                                    with st.expander(f"In {state_selected} {selected_brand} Brand {option} In The Year Of {year}   (Quater Wise COMPARISON)"):
+                                         st.plotly_chart(fig, theme=None, use_container_width=True)
+
+                                elif option == "App Opens":
+                                    query = f"select quater , sum(agg_users_appopens) from public.aggregated_user where year = '{year}' and agg_users_brand = '{selected_brand}' and state = '{state_selected}' group by quater order by quater asc"
+                                    cursor.execute(query)
+                                    res = [i for i in cursor.fetchall()]
+                                    df = pd.DataFrame(res,columns=['Quater','App Opens'])
+                                    pie = px.pie(df, names='Quater', values='App Opens', hole=0.7,
+                                                 color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 ', '#B5EEE2 ', '#51B9A3 '])  # change color
+
+
+                                    pie.update_traces(textposition='outside')
+                                    pie.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                      hoverlabel_font_color="#0DF0D4")
+                                    with st.expander(f"In {state_selected} {selected_brand} Brand {option} In The Quaters Of {year} "):
+                                         st.plotly_chart(pie, theme=None, use_container_width=True)
+                               #_________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+                                # 3) State - wise Brand Engagement of Ao/Ru
+
+                                col1,col2,col3,col4,col5 = st.columns([10,8,2,8,2])
+
+                                if order == 'Top 10':
+                                    if option == "Registered Users":
+                                        query = f"select state , sum(agg_users_count) as val from public.aggregated_user where year = '{year}' and quater = {quater} and agg_users_brand = '{selected_brand}' group by state order by val desc limit 10;"
+                                        cursor.execute(query)
+                                        res = [i for i in cursor.fetchall()]
+                                        df = pd.DataFrame(res,columns=['State','Registered Users'])
+
+                                        fig = px.bar(df, x="State", y="Registered Users")
+                                        fig.update_layout(title_x=1)
+                                        fig.update_layout(
+                                            plot_bgcolor='#0E1117',
+                                            paper_bgcolor='#0E1117',
+                                            xaxis_title_font=dict(color='#0DF0D4'),
+                                            yaxis_title_font=dict(color='#0DF0D4')
+                                        )
+                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                          hoverlabel_font_color="#0DF0D4")
+
+                                        fig.update_traces(marker_color='#1BD4BD')
+                                        with st.expander(f"{order} India States of {selected_brand} Brand {option} Over The Year {year}"):
+                                            st.plotly_chart(fig, theme=None, use_container_width=True)
+                                    elif option == 'App Opens':
+
+                                        query = f"select state , sum(agg_users_appopens) as val from public.aggregated_user where year = '{year}' and quater = {quater} and agg_users_brand = '{selected_brand}' group by state order by val desc limit 10;"
+                                        cursor.execute(query)
+                                        res = [i for i in cursor.fetchall()]
+                                        df = pd.DataFrame(res, columns=['State', 'App opens'])
+
+                                        fig = px.bar(df, x="State", y="App opens")
+                                        fig.update_layout(title_x=1)
+                                        fig.update_layout(
+                                            plot_bgcolor='#0E1117',
+                                            paper_bgcolor='#0E1117',
+                                            xaxis_title_font=dict(color='#0DF0D4'),
+                                            yaxis_title_font=dict(color='#0DF0D4')
+                                        )
+                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                          hoverlabel_font_color="#0DF0D4")
+
+                                        fig.update_traces(marker_color='#1BD4BD')
+                                        with st.expander(f"{order} India States of {selected_brand} Brand {option} Over The Year {year}"):
+                                            st.plotly_chart(fig, theme=None, use_container_width=True)
+
+                                elif order == 'Bottom 10':
+                                    if option == "Registered Users":
+                                        query = f"select state , sum(agg_users_count) as val from public.aggregated_user where year = '{year}' and quater = {quater} and agg_users_brand = '{selected_brand}' group by state order by val  limit 10;"
+                                        cursor.execute(query)
+                                        res = [i for i in cursor.fetchall()]
+                                        df = pd.DataFrame(res,columns=['State','Registered Users'])
+
+                                        fig = px.bar(df, x="State", y="Registered Users")
+                                        fig.update_layout(title_x=1)
+                                        fig.update_layout(
+                                            plot_bgcolor='#0E1117',
+                                            paper_bgcolor='#0E1117',
+                                            xaxis_title_font=dict(color='#0DF0D4'),
+                                            yaxis_title_font=dict(color='#0DF0D4')
+                                        )
+                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                          hoverlabel_font_color="#0DF0D4")
+
+                                        fig.update_traces(marker_color='#1BD4BD')
+                                        with st.expander(f"{order} India States of {selected_brand} Brand {option} Over The Year {year}"):
+                                            st.plotly_chart(fig, theme=None, use_container_width=True)
+                                    elif option == 'App Opens':
+
+                                        query = f"select state , sum(agg_users_appopens) as val from public.aggregated_user where year = '{year}' and quater = {quater} and agg_users_brand = '{selected_brand}' group by state order by val  limit 10;"
+                                        cursor.execute(query)
+                                        res = [i for i in cursor.fetchall()]
+                                        df = pd.DataFrame(res, columns=['State', 'App opens'])
+
+                                        fig = px.bar(df, x="State", y="App opens")
+                                        fig.update_layout(title_x=1)
+                                        fig.update_layout(
+                                            plot_bgcolor='#0E1117',
+                                            paper_bgcolor='#0E1117',
+                                            xaxis_title_font=dict(color='#0DF0D4'),
+                                            yaxis_title_font=dict(color='#0DF0D4')
+                                        )
+                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                          hoverlabel_font_color="#0DF0D4")
+
+                                        fig.update_traces(marker_color='#1BD4BD')
+                                        with st.expander(f"{order} India States of {selected_brand} Brand {option} Over The Year {year}"):
+                                            st.plotly_chart(fig, theme=None, use_container_width=True)
+
+                                #________________________________________________________________________________________________________________________________________________________________________
+
+                                # Top 10 / bottom 10 Brand in each state
+
+                                if order == 'Top 10':
+                                    if option == "Registered Users":
+                                        query = f"select agg_users_brand  , sum(agg_users_count) as val from public.aggregated_user where year = '{year}' and quater = {quater} and state = '{state_selected}' group by state , agg_users_brand  order by val desc limit 10;"
+                                        cursor.execute(query)
+                                        res = [i for i in cursor.fetchall()]
+                                        df = pd.DataFrame(res,columns=['Mobile Brand','Registered Users'])
+
+                                        fig = px.bar(df, x="Mobile Brand", y="Registered Users")
+                                        fig.update_layout(title_x=1)
+                                        fig.update_layout(
+                                            plot_bgcolor='#0E1117',
+                                            paper_bgcolor='#0E1117',
+                                            xaxis_title_font=dict(color='#0DF0D4'),
+                                            yaxis_title_font=dict(color='#0DF0D4')
+                                        )
+                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                          hoverlabel_font_color="#0DF0D4")
+
+                                        fig.update_traces(marker_color='#1BD4BD')
+                                        with st.expander(f"{order} {option} Brands In {state_selected} In The Year {year}"):
+                                            st.plotly_chart(fig, theme=None, use_container_width=True)
+
+
+                                elif order == 'Bottom 10':
+
+                                    if option == "Registered Users":
+                                        query = f"select agg_users_brand  , sum(agg_users_count) as val from public.aggregated_user where year = '{year}' and quater = {quater} and state = '{state_selected}' group by state , agg_users_brand  order by val  limit 10;"
+                                        cursor.execute(query)
+                                        res = [i for i in cursor.fetchall()]
+                                        df = pd.DataFrame(res,columns=['Mobile Brand','Registered Users'])
+
+                                        fig = px.bar(df, x="Mobile Brand", y="Registered Users")
+                                        fig.update_layout(title_x=1)
+                                        fig.update_layout(
+                                            plot_bgcolor='#0E1117',
+                                            paper_bgcolor='#0E1117',
+                                            xaxis_title_font=dict(color='#0DF0D4'),
+                                            yaxis_title_font=dict(color='#0DF0D4')
+                                        )
+                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                          hoverlabel_font_color="#0DF0D4")
+
+                                        fig.update_traces(marker_color='#1BD4BD')
+                                        with st.expander(f"{order} {option} Brands In {state_selected} In The Year {year}"):
+                                            st.plotly_chart(fig, theme=None, use_container_width=True)
+
+
+                                #_____________________________________________________________________________________________________________________________________________________________________
+                                st.write("")
+                                st.write("")
+                                st.write("")
+                                st.write("")  # #262730
+
+                                colored_header(
+                                    label="CONCLUSION",
+                                    description="The Mobile Brands Xiaomi,Samsung,Vivo,Oppo,Others,Realme,Apple,Motorola,Oneplus,Huawei Has Higher User Engagement",
+                                    color_name="blue-green-70",
                                 )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#0DF0D4")
+                                # ____________________________________________________________________________________________________________________________________________________________________'
 
-                                with st.expander(f"What are the Mobile Brands has Lower User Engagement ?"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
+                                if st.button("Click Me!"):
+                                    if order == "Top 10":
+                                        query = f"select agg_users_brand , sum(agg_users_count) val from public.aggregated_user where agg_users_brand != 'Not Mentioned' group by agg_users_brand order by val desc limit 10;"
+                                        cursor.execute(query)
+                                        res = [i for i in cursor.fetchall()]
+                                        df = pd.DataFrame(res, columns=['Mobile Brand', 'User Engagement'])
+
+                                        fig = px.pie(df, names="Mobile Brand", values="User Engagement",
+                                                     color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 '])
+                                        fig.update_layout(title_x=1)
+                                        fig.update_layout(
+                                            plot_bgcolor='#0E1117',
+                                            paper_bgcolor='#0E1117',
+                                            xaxis_title_font=dict(color='#0DF0D4'),
+                                            yaxis_title_font=dict(color='#0DF0D4')
+                                        )
+                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                          hoverlabel_font_color="#0DF0D4")
+
+                                        with st.expander(f"What are the Mobile Brands has Higher User Engagement ?"):
+                                            st.plotly_chart(fig, theme=None, use_container_width=True)
+                                    elif order == "Bottom 10":
+                                        query = f"select agg_users_brand , sum(agg_users_count) val from public.aggregated_user where agg_users_brand != 'Not Mentioned' group by agg_users_brand order by val limit 10;"
+                                        cursor.execute(query)
+                                        res = [i for i in cursor.fetchall()]
+                                        df = pd.DataFrame(res, columns=['Mobile Brand', 'User Engagement'])
+
+                                        fig = px.pie(df, names="Mobile Brand", values="User Engagement",
+                                                     color_discrete_sequence=['#0DF0D4', '#169E8D', '#64F4D6 '])
+                                        fig.update_layout(title_x=1)
+                                        fig.update_layout(
+                                            plot_bgcolor='#0E1117',
+                                            paper_bgcolor='#0E1117',
+                                            xaxis_title_font=dict(color='#0DF0D4'),
+                                            yaxis_title_font=dict(color='#0DF0D4')
+                                        )
+                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                          hoverlabel_font_color="#0DF0D4")
+
+                                        with st.expander(f"What are the Mobile Brands has Lower User Engagement ?"):
+                                            st.plotly_chart(fig, theme=None, use_container_width=True)
                     #_______________________________________________________________________________________________________________________________________________________________________________________________
                     elif selected == "Location-Wise Analysis":
 
@@ -2493,7 +2518,7 @@ class Phonepe_pulse:
                                             st.plotly_chart(pie, theme=None, use_container_width=True)
                         #____________________________________________________________________________________________________________________________________________________________________
 
-                            if option == 'App Opens':
+                            elif option == 'App Opens':
                                 if order == 'Top 10':
                                     if vary == "District":
 
@@ -2515,8 +2540,8 @@ class Phonepe_pulse:
 
                                         with col2.expander(f"{order} District By {option}"):
                                             st.plotly_chart(fig, theme=None, use_container_width=True)
-
-
+                                    elif vary == 'Pincode':
+                                        st.code('Phonepe  has  not  provided  Appopens  Data  for  Pincode')
 
                                 elif order == 'Bottom 10':
                                     if vary == "District":
@@ -2539,226 +2564,198 @@ class Phonepe_pulse:
 
                                         with col2.expander(f"{order} District By {option}"):
                                             st.plotly_chart(fig, theme=None, use_container_width=True)
+                                    elif vary == 'Pincode':
+                                        st.code('Phonepe  has  not  provided  Appopens  Data  for  Pincode')
 
                             st.write("")
                             st.write("")
                             st.write("")
+
                             colored_header(
                                 label="CONCLUSION",
                                 description= "State : maharashtra , District : bengaluru urban , Pincode : 201301 has higher user engagement",
-                                color_name="blue-green-70", )
+                                color_name="blue-green-70")
                     #---------------------------------------------------------------------------------------------------------------------------_____________________________________________________________________________________________________________________________________________________________________________________________
                     elif selected == "Time-Based Analysis":
 
                         st.markdown("<style>div.block-container{padding-top:3rem;}</style>", unsafe_allow_html=True)
 
+                        explore_1 = option_menu(
+                            menu_title="",
+                            options=['Click', 'Explore Dashboard'],
+                            icons=['arrow-right-circle-fill', 'eye-fill'],
+                            menu_icon='',
+                            default_index=0,
+                            orientation='horizontal'
+                        )
 
-                        colored_header(
-                            label="TIME-BASED ANALYSIS",
-                            description="",
-                            color_name="blue-green-70", )
+                        if explore_1 == 'Click':
+                            # animation
+                            def lottie(filepath):
+                                with open(filepath, 'r') as file:
+                                    return js.load(file)
 
-                        # animation
-                        def lottie(filepath):
-                            with open(filepath, 'r') as file:
-                                return js.load(file)
-
-                        col1, col2, col3 = st.columns([5, 10, 5])
-                        with col2:
-                            file = lottie("time_series.json")
-                            st_lottie(
-                                file,
-                                speed=1,
-                                reverse=False,
-                                loop=True,
-                                quality='low',
-                                # renderer='svg',
-                                height=500,
-                                width=500,
-                                key=None
-                            )
-
-
-                        st.write("")
-                        st.write("")
-
-
-
-                        #______________________________________________________________________________________________________________________________________________________________________
-
-                                                                                             #________FILTER____________#
-
-                        col1, col2, col3,col4 ,col5,col6= st.columns([8,10,10,8,8,10])
-
-                        # Select State or District
-                        with col1.expander("FILTER"):
-                            select = st.selectbox('PICK OPTION',['State','District','Pincode'])
-
-                        # State
-                        query = "select distinct(state) from public.map_transaction  order by state asc"
-                        cursor.execute(query)
-                        res = [i[0] for i in cursor.fetchall()]
-                        with col2.expander("FILTER"):
-                            state_selected = st.selectbox("CHOOSE STATE",res)
-
-                        # District
-
-                        query_1 = f"select distinct(map_transaction_district) from public.map_transaction  where state = '{state_selected}' order by map_transaction_district asc"
-
-                        cursor.execute(query_1)
-                        res_1 = [i[0] for i in cursor.fetchall()]
-                        with col3.expander("FILTER"):
-                            dist_selected  = st.selectbox("CHOOSE DISTRICT", res_1)
-
-                        # Year
-
-                        query_2 = "select distinct(year) from public.map_transaction  order by year desc"
-
-                        cursor.execute(query_2)
-                        res_2 = [i[0] for i in cursor.fetchall()]
-                        with col5.expander("FILTER"):
-                            year = st.selectbox("CHOOSE YEAR", res_2)
-
-                        # pincode
-
-                        query =f"select distinct(top_transaction_pincode) from public.top_transaction_pincode where top_transaction_pincode is not null and state = '{state_selected}' order by top_transaction_pincode"
-                        cursor.execute(query)
-                        res_2 = [int(i[0]) for i in cursor.fetchall()]
-                        with col4.expander("FILTER"):
-                            pincode = st.selectbox("CHOOSE PINCODE", res_2)
-
-
-                        # Option
-
-                        with col6.expander('FILTER'):
-                           option =  st.selectbox("CHOOSE OPTION",['Transaction Amount',"Transaction Count","Registered Users",'App Opens'])
-                        st.write("")
-                        st.write("")
-
-
-
-                        #__________________________________________________________________________________________________________________________________________________________________________________________
-
-                        c1, c2, c3 = st.columns([18, 10, 18])
-
-                        with c2:
-                            colored_header(
-                                label="QUATER-WISE ANALYSIS",
-                                description="",
-                                color_name="blue-green-70", )
-
-
-                        st.write("")
-
-                        #________________________________________________________________________________________________________________________________________________________________________________________________________
-
-                                                                                                                #_______CHARTS_______#
-                        #
-                        c1, c2, c3 = st.columns([1, 100, 1])
-
-
-
-                        # # 1)  Total Amount , Count , RU By state , year , District
-
-                        if select == "State":
-
-                            if option == 'Transaction Amount':
-
-                                    query = f"select quater , sum(map_transaction_amount) from public.map_transaction where state = '{state_selected}' and year = '{year}' group by quater order by quater asc"
-
-                                    cursor.execute(query)
-                                    res = [i for i in cursor.fetchall()]
-                                    df = pd.DataFrame(res, columns=['Quater', 'Transaction Amount'])
-                                    fig = px.line(df, x="Quater", y="Transaction Amount", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                    fig.update_layout(title_x=1)
-                                    fig.update_layout(
-                                        plot_bgcolor='#0E1117',
-                                        paper_bgcolor='#0E1117',
-                                        xaxis_title_font=dict(color='#1BD4BD'),
-                                        yaxis_title_font=dict(color='#1BD4BD')
-                                    )
-                                    fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                      hoverlabel_font_color="#1BD4BD")
-                                    fig.update_traces(marker_color='#FFFFFF')
-                                    with c2.expander(f"{option} in {state_selected} Over the quaters of {year}"):
-                                        st.plotly_chart(fig, theme=None, use_container_width=True)
-
-                            elif option == "Transaction Count":
-
-                                   query = f"select quater , sum(map_transaction_count) from public.map_transaction where state = '{state_selected}' and year = '{year}' group by quater order by quater asc;"
-                                   cursor.execute(query)
-                                   res = [i for i in cursor.fetchall()]
-                                   df = pd.DataFrame(res, columns=['Quater', 'Transaction Count'])
-                                   fig = px.line(df, x="Quater", y="Transaction Count", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                   fig.update_layout(title_x=1)
-                                   fig.update_layout(
-                                        plot_bgcolor='#0E1117',
-                                        paper_bgcolor='#0E1117',
-                                        xaxis_title_font=dict(color='#1BD4BD'),
-                                        yaxis_title_font=dict(color='#1BD4BD')
-                                    )
-                                   fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                      hoverlabel_font_color="#1BD4BD")
-                                   fig.update_traces(marker_color='#FFFFFF')
-                                   with c2.expander(f"{option} in {state_selected} Over the quaters of {year}"):
-                                       st.plotly_chart(fig, theme=None, use_container_width=True)
-
-
-
-                            elif option == "Registered Users":
-
-                                query = f"select quater , sum(map_registered_users)  from public.map_user where year ='{year}' and state = '{state_selected}' group by quater order by quater asc"
-
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res, columns=['Quater', 'Registered Users'])
-                                fig = px.line(df, x="Quater", y="Registered Users", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#1BD4BD'),
-                                    yaxis_title_font=dict(color='#1BD4BD')
+                            col1, col2, col3 = st.columns([5, 10, 5])
+                            with col2:
+                                file = lottie("time_series.json")
+                                st_lottie(
+                                    file,
+                                    speed=1,
+                                    reverse=False,
+                                    loop=True,
+                                    quality='low',
+                                    # renderer='svg',
+                                    height=500,
+                                    width=500,
+                                    key=None
                                 )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#1BD4BD")
-                                fig.update_traces(marker_color='#FFFFFF')
-                                with c2.expander(f"{option} in {state_selected} Over the quaters of {year}"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
 
-                            elif option == "App Opens":
+                            col1, col2, col3 = st.columns([6, 10, 5])
+                            col2.markdown(
+                                "<h1 style='font-size: 50px;'><span style='color: cyan;'>Time</span> <span style='color: white;'>Series</span> <span style='color: cyan;'>Analysis</span></h1>",
+                                unsafe_allow_html=True)
 
-                                query = f"select quater , sum(map_appopens)  from public.map_user where year ='{year}' and state = '{state_selected}' group by quater order by quater asc"
+                        elif explore_1 == 'Explore Dashboard':
 
+                                st.write("")
+                                st.write("")
+
+                                colored_header(
+                                    label="TIME-BASED ANALYSIS",
+                                    description="",
+                                    color_name="blue-green-70", )
+
+                                st.write("")
+                                st.write("")
+                                #______________________________________________________________________________________________________________________________________________________________________
+
+                                                                                                     #________FILTER____________#
+
+                                col1, col2, col3,col4 ,col5,col6= st.columns([8,10,10,8,8,10])
+
+                                # Select State or District
+                                with col1.expander("FILTER"):
+                                    select = st.selectbox('PICK OPTION',['State','District','Pincode'])
+
+                                # State
+                                query = "select distinct(state) from public.map_transaction  order by state asc"
                                 cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res, columns=['Quater', 'App Opens'])
-                                fig = px.line(df, x="Quater", y="App Opens", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#1BD4BD'),
-                                    yaxis_title_font=dict(color='#1BD4BD')
-                                )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#1BD4BD")
-                                fig.update_traces(marker_color='#FFFFFF')
-                                with c2.expander(f"{option} in {state_selected} Over the quaters of {year}"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
+                                res = [i[0] for i in cursor.fetchall()]
+                                with col2.expander("FILTER"):
+                                    state_selected = st.selectbox("CHOOSE STATE",res)
 
-                        #________________________________________________________________________________ Quaters In District Wise__________________________________________________________________________
+                                # District
 
-                        elif select == "District":
+                                query_1 = f"select distinct(map_transaction_district) from public.map_transaction  where state = '{state_selected}' order by map_transaction_district asc"
 
-                                if option == 'Transaction Amount':
+                                cursor.execute(query_1)
+                                res_1 = [i[0] for i in cursor.fetchall()]
+                                with col3.expander("FILTER"):
+                                    dist_selected  = st.selectbox("CHOOSE DISTRICT", res_1)
 
-                                        query = f"select quater , sum(map_transaction_amount) from public.map_transaction where map_transaction_district = '{dist_selected}' and year = '{year}' group by quater order by quater asc"
+                                # Year
+
+                                query_2 = "select distinct(year) from public.map_transaction  order by year desc"
+
+                                cursor.execute(query_2)
+                                res_2 = [i[0] for i in cursor.fetchall()]
+                                with col5.expander("FILTER"):
+                                    year = st.selectbox("CHOOSE YEAR", res_2)
+
+                                # pincode
+
+                                query =f"select distinct(top_transaction_pincode) from public.top_transaction_pincode where top_transaction_pincode is not null and state = '{state_selected}' order by top_transaction_pincode"
+                                cursor.execute(query)
+                                res_2 = [int(i[0]) for i in cursor.fetchall()]
+                                with col4.expander("FILTER"):
+                                    pincode = st.selectbox("CHOOSE PINCODE", res_2)
+
+
+                                # Option
+
+                                with col6.expander('FILTER'):
+                                   option =  st.selectbox("CHOOSE OPTION",['Transaction Amount',"Transaction Count","Registered Users",'App Opens'])
+                                st.write("")
+                                st.write("")
+
+
+
+                                #__________________________________________________________________________________________________________________________________________________________________________________________
+
+                                c1, c2, c3 = st.columns([18, 10, 18])
+
+                                with c2:
+                                    colored_header(
+                                        label="QUATER-WISE ANALYSIS",
+                                        description="",
+                                        color_name="blue-green-70", )
+
+
+                                st.write("")
+
+                                #________________________________________________________________________________________________________________________________________________________________________________________________________
+
+                                                                                                                        #_______CHARTS_______#
+                                #
+                                c1, c2, c3 = st.columns([1, 100, 1])
+
+
+
+                                # # 1)  Total Amount , Count , RU By state , year , District
+
+                                if select == "State":
+
+                                    if option == 'Transaction Amount':
+
+                                            query = f"select quater , sum(map_transaction_amount) from public.map_transaction where state = '{state_selected}' and year = '{year}' group by quater order by quater asc"
+
+                                            cursor.execute(query)
+                                            res = [i for i in cursor.fetchall()]
+                                            df = pd.DataFrame(res, columns=['Quater', 'Transaction Amount'])
+                                            fig = px.line(df, x="Quater", y="Transaction Amount", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
+                                            fig.update_layout(title_x=1)
+                                            fig.update_layout(
+                                                plot_bgcolor='#0E1117',
+                                                paper_bgcolor='#0E1117',
+                                                xaxis_title_font=dict(color='#1BD4BD'),
+                                                yaxis_title_font=dict(color='#1BD4BD')
+                                            )
+                                            fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                              hoverlabel_font_color="#1BD4BD")
+                                            fig.update_traces(marker_color='#FFFFFF')
+                                            with c2.expander(f"{option} in {state_selected} Over the quaters of {year}"):
+                                                st.plotly_chart(fig, theme=None, use_container_width=True)
+
+                                    elif option == "Transaction Count":
+
+                                           query = f"select quater , sum(map_transaction_count) from public.map_transaction where state = '{state_selected}' and year = '{year}' group by quater order by quater asc;"
+                                           cursor.execute(query)
+                                           res = [i for i in cursor.fetchall()]
+                                           df = pd.DataFrame(res, columns=['Quater', 'Transaction Count'])
+                                           fig = px.line(df, x="Quater", y="Transaction Count", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
+                                           fig.update_layout(title_x=1)
+                                           fig.update_layout(
+                                                plot_bgcolor='#0E1117',
+                                                paper_bgcolor='#0E1117',
+                                                xaxis_title_font=dict(color='#1BD4BD'),
+                                                yaxis_title_font=dict(color='#1BD4BD')
+                                            )
+                                           fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                              hoverlabel_font_color="#1BD4BD")
+                                           fig.update_traces(marker_color='#FFFFFF')
+                                           with c2.expander(f"{option} in {state_selected} Over the quaters of {year}"):
+                                               st.plotly_chart(fig, theme=None, use_container_width=True)
+
+
+
+                                    elif option == "Registered Users":
+
+                                        query = f"select quater , sum(map_registered_users)  from public.map_user where year ='{year}' and state = '{state_selected}' group by quater order by quater asc"
 
                                         cursor.execute(query)
                                         res = [i for i in cursor.fetchall()]
-                                        df = pd.DataFrame(res, columns=['Quater', 'Transaction Amount'])
-                                        fig = px.line(df, x="Quater", y="Transaction Amount", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
+                                        df = pd.DataFrame(res, columns=['Quater', 'Registered Users'])
+                                        fig = px.line(df, x="Quater", y="Registered Users", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
                                         fig.update_layout(title_x=1)
                                         fig.update_layout(
                                             plot_bgcolor='#0E1117',
@@ -2769,55 +2766,12 @@ class Phonepe_pulse:
                                         fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
                                                           hoverlabel_font_color="#1BD4BD")
                                         fig.update_traces(marker_color='#FFFFFF')
-                                        with c2.expander(f"{option} in {dist_selected} Over the quaters of {year}"):
+                                        with c2.expander(f"{option} in {state_selected} Over the quaters of {year}"):
                                             st.plotly_chart(fig, theme=None, use_container_width=True)
 
-                                elif option == "Transaction Count":
+                                    elif option == "App Opens":
 
-                                        query = f"select quater , sum(map_transaction_count) from public.map_transaction where map_transaction_district = '{dist_selected}' and year = '{year}' group by quater order by quater asc;"
-                                        cursor.execute(query)
-                                        res = [i for i in cursor.fetchall()]
-                                        df = pd.DataFrame(res, columns=['Quater', 'Transaction Count'])
-                                        fig = px.line(df, x="Quater", y="Transaction Count", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                        fig.update_layout(title_x=1)
-                                        fig.update_layout(
-                                            plot_bgcolor='#0E1117',
-                                            paper_bgcolor='#0E1117',
-                                            xaxis_title_font=dict(color='#1BD4BD'),
-                                            yaxis_title_font=dict(color='#1BD4BD')
-                                        )
-                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                          hoverlabel_font_color="#1BD4BD")
-                                        fig.update_traces(marker_color='#FFFFFF')
-                                        with c2.expander(f"{option} in {dist_selected} Over the quaters of {year}"):
-                                           st.plotly_chart(fig, theme=None, use_container_width=True)
-
-
-
-                                elif option == "Registered Users":
-
-                                    query = f"select quater , sum(map_registered_users)  from public.map_user where year ='{year}' and map_user_District = '{dist_selected}' group by quater order by quater asc"
-
-                                    cursor.execute(query)
-                                    res = [i for i in cursor.fetchall()]
-                                    df = pd.DataFrame(res, columns=['Quater', 'Registered Users'])
-                                    fig = px.line(df, x="Quater", y="Registered Users", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                    fig.update_layout(title_x=1)
-                                    fig.update_layout(
-                                        plot_bgcolor='#0E1117',
-                                        paper_bgcolor='#0E1117',
-                                        xaxis_title_font=dict(color='#1BD4BD'),
-                                        yaxis_title_font=dict(color='#1BD4BD')
-                                    )
-                                    fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                      hoverlabel_font_color="#1BD4BD")
-                                    fig.update_traces(marker_color='#FFFFFF')
-                                    with c2.expander(f"{option} in {dist_selected} Over the quaters of {year}"):
-                                        st.plotly_chart(fig, theme=None, use_container_width=True)
-
-                                elif option == 'App Opens':
-
-                                        query = f"select quater , sum(map_appopens) from public.map_user where map_user_district = '{dist_selected}' and year = '{year}' group by quater order by quater asc"
+                                        query = f"select quater , sum(map_appopens)  from public.map_user where year ='{year}' and state = '{state_selected}' group by quater order by quater asc"
 
                                         cursor.execute(query)
                                         res = [i for i in cursor.fetchall()]
@@ -2833,300 +2787,204 @@ class Phonepe_pulse:
                                         fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
                                                           hoverlabel_font_color="#1BD4BD")
                                         fig.update_traces(marker_color='#FFFFFF')
-                                        with c2.expander(f"{option} in {dist_selected} Over the quaters of {year}"):
+                                        with c2.expander(f"{option} in {state_selected} Over the quaters of {year}"):
                                             st.plotly_chart(fig, theme=None, use_container_width=True)
 
+                                #________________________________________________________________________________ Quaters In District Wise__________________________________________________________________________
 
-                                                                 #_____________________PINCODE QUATERS_______________________________#
+                                elif select == "District":
 
-                        elif select == "Pincode":
+                                        if option == 'Transaction Amount':
 
-                                if option == 'Transaction Amount':
+                                                query = f"select quater , sum(map_transaction_amount) from public.map_transaction where map_transaction_district = '{dist_selected}' and year = '{year}' group by quater order by quater asc"
 
-                                        query = f"select quater , sum(top_transaction_amount) from public.top_transaction_pincode where top_transaction_pincode = {pincode} and year = '{year}' group by quater order by quater asc"
+                                                cursor.execute(query)
+                                                res = [i for i in cursor.fetchall()]
+                                                df = pd.DataFrame(res, columns=['Quater', 'Transaction Amount'])
+                                                fig = px.line(df, x="Quater", y="Transaction Amount", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
+                                                fig.update_layout(title_x=1)
+                                                fig.update_layout(
+                                                    plot_bgcolor='#0E1117',
+                                                    paper_bgcolor='#0E1117',
+                                                    xaxis_title_font=dict(color='#1BD4BD'),
+                                                    yaxis_title_font=dict(color='#1BD4BD')
+                                                )
+                                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                                  hoverlabel_font_color="#1BD4BD")
+                                                fig.update_traces(marker_color='#FFFFFF')
+                                                with c2.expander(f"{option} in {dist_selected} Over the quaters of {year}"):
+                                                    st.plotly_chart(fig, theme=None, use_container_width=True)
 
-                                        cursor.execute(query)
-                                        res = [i for i in cursor.fetchall()]
-                                        df = pd.DataFrame(res, columns=['Quater', 'Transaction Amount'])
-                                        fig = px.line(df, x="Quater", y="Transaction Amount", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                        fig.update_layout(title_x=1)
-                                        fig.update_layout(
-                                            plot_bgcolor='#0E1117',
-                                            paper_bgcolor='#0E1117',
-                                            xaxis_title_font=dict(color='#1BD4BD'),
-                                            yaxis_title_font=dict(color='#1BD4BD')
-                                        )
-                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                          hoverlabel_font_color="#1BD4BD")
-                                        fig.update_traces(marker_color='#FFFFFF')
-                                        with c2.expander(f"{option} in pincode {pincode} Over the quaters of {year}"):
-                                            st.plotly_chart(fig, theme=None, use_container_width=True)
+                                        elif option == "Transaction Count":
 
-                                elif option == "Transaction Count":
-
-                                        query = f"select quater , sum(top_transaction_count) from public.top_transaction_pincode where top_transaction_pincode = {pincode} and year = '{year}' group by quater order by quater asc"
-                                        cursor.execute(query)
-                                        res = [i for i in cursor.fetchall()]
-                                        df = pd.DataFrame(res, columns=['Quater', 'Transaction Count'])
-                                        fig = px.line(df, x="Quater", y="Transaction Count", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                        fig.update_layout(title_x=1)
-                                        fig.update_layout(
-                                            plot_bgcolor='#0E1117',
-                                            paper_bgcolor='#0E1117',
-                                            xaxis_title_font=dict(color='#1BD4BD'),
-                                            yaxis_title_font=dict(color='#1BD4BD')
-                                        )
-                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                          hoverlabel_font_color="#1BD4BD")
-                                        fig.update_traces(marker_color='#FFFFFF')
-                                        with c2.expander(f"{option} in pincode {pincode} Over the quaters of {year}"):
-                                           st.plotly_chart(fig, theme=None, use_container_width=True)
-
-
-
-                                elif option == "Registered Users":
-
-                                    query = f"select quater , sum(top_registered_users) from public.top_user_pincode where top_user_pincode = {pincode} and year = '{year}' group by quater order by quater asc"
-
-                                    cursor.execute(query)
-                                    res = [i for i in cursor.fetchall()]
-                                    df = pd.DataFrame(res, columns=['Quater', 'Registered Users'])
-                                    fig = px.line(df, x="Quater", y="Registered Users", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                    fig.update_layout(title_x=1)
-                                    fig.update_layout(
-                                        plot_bgcolor='#0E1117',
-                                        paper_bgcolor='#0E1117',
-                                        xaxis_title_font=dict(color='#1BD4BD'),
-                                        yaxis_title_font=dict(color='#1BD4BD')
-                                    )
-                                    fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                      hoverlabel_font_color="#1BD4BD")
-                                    fig.update_traces(marker_color='#FFFFFF')
-                                    with c2.expander(f"{option} in pincode {pincode} Over the quaters of {year}"):
-                                        st.plotly_chart(fig, theme=None, use_container_width=True)
+                                                query = f"select quater , sum(map_transaction_count) from public.map_transaction where map_transaction_district = '{dist_selected}' and year = '{year}' group by quater order by quater asc;"
+                                                cursor.execute(query)
+                                                res = [i for i in cursor.fetchall()]
+                                                df = pd.DataFrame(res, columns=['Quater', 'Transaction Count'])
+                                                fig = px.line(df, x="Quater", y="Transaction Count", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
+                                                fig.update_layout(title_x=1)
+                                                fig.update_layout(
+                                                    plot_bgcolor='#0E1117',
+                                                    paper_bgcolor='#0E1117',
+                                                    xaxis_title_font=dict(color='#1BD4BD'),
+                                                    yaxis_title_font=dict(color='#1BD4BD')
+                                                )
+                                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                                  hoverlabel_font_color="#1BD4BD")
+                                                fig.update_traces(marker_color='#FFFFFF')
+                                                with c2.expander(f"{option} in {dist_selected} Over the quaters of {year}"):
+                                                   st.plotly_chart(fig, theme=None, use_container_width=True)
 
 
 
+                                        elif option == "Registered Users":
+
+                                            query = f"select quater , sum(map_registered_users)  from public.map_user where year ='{year}' and map_user_District = '{dist_selected}' group by quater order by quater asc"
+
+                                            cursor.execute(query)
+                                            res = [i for i in cursor.fetchall()]
+                                            df = pd.DataFrame(res, columns=['Quater', 'Registered Users'])
+                                            fig = px.line(df, x="Quater", y="Registered Users", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
+                                            fig.update_layout(title_x=1)
+                                            fig.update_layout(
+                                                plot_bgcolor='#0E1117',
+                                                paper_bgcolor='#0E1117',
+                                                xaxis_title_font=dict(color='#1BD4BD'),
+                                                yaxis_title_font=dict(color='#1BD4BD')
+                                            )
+                                            fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                              hoverlabel_font_color="#1BD4BD")
+                                            fig.update_traces(marker_color='#FFFFFF')
+                                            with c2.expander(f"{option} in {dist_selected} Over the quaters of {year}"):
+                                                st.plotly_chart(fig, theme=None, use_container_width=True)
+
+                                        elif option == 'App Opens':
+
+                                                query = f"select quater , sum(map_appopens) from public.map_user where map_user_district = '{dist_selected}' and year = '{year}' group by quater order by quater asc"
+
+                                                cursor.execute(query)
+                                                res = [i for i in cursor.fetchall()]
+                                                df = pd.DataFrame(res, columns=['Quater', 'App Opens'])
+                                                fig = px.line(df, x="Quater", y="App Opens", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
+                                                fig.update_layout(title_x=1)
+                                                fig.update_layout(
+                                                    plot_bgcolor='#0E1117',
+                                                    paper_bgcolor='#0E1117',
+                                                    xaxis_title_font=dict(color='#1BD4BD'),
+                                                    yaxis_title_font=dict(color='#1BD4BD')
+                                                )
+                                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                                  hoverlabel_font_color="#1BD4BD")
+                                                fig.update_traces(marker_color='#FFFFFF')
+                                                with c2.expander(f"{option} in {dist_selected} Over the quaters of {year}"):
+                                                    st.plotly_chart(fig, theme=None, use_container_width=True)
 
 
-                        st.write("")
-                        st.write("")
-                        st.write("")
-                        st.write("")
+                                                                         #_____________________PINCODE QUATERS_______________________________#
 
-                       #_____________________________________________________________________________________________________________________________________________________________________________________________________________
+                                elif select == "Pincode":
 
+                                        if option == 'Transaction Amount':
 
-                        st.write("")
+                                                query = f"select quater , sum(top_transaction_amount) from public.top_transaction_pincode where top_transaction_pincode = {pincode} and year = '{year}' group by quater order by quater asc"
 
-                        c1, c2, c3 = st.columns([17, 10,17])
+                                                cursor.execute(query)
+                                                res = [i for i in cursor.fetchall()]
+                                                df = pd.DataFrame(res, columns=['Quater', 'Transaction Amount'])
+                                                fig = px.line(df, x="Quater", y="Transaction Amount", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
+                                                fig.update_layout(title_x=1)
+                                                fig.update_layout(
+                                                    plot_bgcolor='#0E1117',
+                                                    paper_bgcolor='#0E1117',
+                                                    xaxis_title_font=dict(color='#1BD4BD'),
+                                                    yaxis_title_font=dict(color='#1BD4BD')
+                                                )
+                                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                                  hoverlabel_font_color="#1BD4BD")
+                                                fig.update_traces(marker_color='#FFFFFF')
+                                                with c2.expander(f"{option} in pincode {pincode} Over the quaters of {year}"):
+                                                    st.plotly_chart(fig, theme=None, use_container_width=True)
 
-                        with c2:
-                            colored_header(
-                                label="OVERALL YEAR ANALYSIS",
-                                description="",
-                                color_name="blue-green-70", )
+                                        elif option == "Transaction Count":
 
-                        #__________________________________________________________________________________________________________________________________________________________________________________________________________________
-                        st.write("")
-                        c1, c2, c3 = st.columns([1, 100, 1])
-
-                        # # 1)  Total Amount , Count , RU By state , year , District
-
-                        if select == "State":
-
-                            if option == 'Transaction Amount':
-
-                                query = f"select year , sum(map_transaction_amount) from public.map_transaction where state = '{state_selected}'  group by year order by year asc"
-
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res, columns=['Year', 'Transaction Amount'])
-                                fig = px.line(df, x="Year", y="Transaction Amount", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#1BD4BD'),
-                                    yaxis_title_font=dict(color='#1BD4BD')
-                                )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#1BD4BD")
-                                fig.update_traces(marker_color='#FFFFFF')
-                                with c2.expander(f"{option} in {state_selected}  Over The Years From 2018 To 2022"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
-
-                            elif option == "Transaction Count":
-
-                                query = f"select year , sum(map_transaction_count) from public.map_transaction where state = '{state_selected}'  group by year order by year asc;"
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res, columns=['Year', 'Transaction Count'])
-                                fig = px.line(df, x="Year", y="Transaction Count", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#1BD4BD'),
-                                    yaxis_title_font=dict(color='#1BD4BD')
-                                )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#1BD4BD")
-                                fig.update_traces(marker_color='#FFFFFF')
-                                with c2.expander(f"{option} in {state_selected}  Over The Years From 2018 To 2022"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
-
-
-
-                            elif option == "Registered Users":
-
-                                query = f"select year , sum(map_registered_users)  from public.map_user where state = '{state_selected}'  group by year order by year asc;"
-
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res, columns=['Year', 'Registered Users'])
-                                fig = px.line(df, x="Year", y="Registered Users", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#1BD4BD'),
-                                    yaxis_title_font=dict(color='#1BD4BD')
-                                )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#1BD4BD")
-                                fig.update_traces(marker_color='#FFFFFF')
-                                with c2.expander(f"{option} in {state_selected}  Over The Years From 2018 To 2022"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
-
-                            elif option == "App Opens":
-
-                                    query = f"select year , sum(map_appopens)  from public.map_user where  state = '{state_selected}' group by year order by year asc"
-
-                                    cursor.execute(query)
-                                    res = [i for i in cursor.fetchall()]
-                                    df = pd.DataFrame(res, columns=['Year', 'App Opens'])
-                                    fig = px.line(df, x="Year", y="App Opens", markers='D',
-                                                  color_discrete_sequence=['#1BD4BD', '#0AD6CD'])
-                                    fig.update_layout(title_x=1)
-                                    fig.update_layout(
-                                        plot_bgcolor='#0E1117',
-                                        paper_bgcolor='#0E1117',
-                                        xaxis_title_font=dict(color='#1BD4BD'),
-                                        yaxis_title_font=dict(color='#1BD4BD')
-                                    )
-                                    fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                      hoverlabel_font_color="#1BD4BD")
-                                    fig.update_traces(marker_color='#FFFFFF')
-                                    with c2.expander(f"{option} in {state_selected}  Over The Years From 2018 To 2022"):
-                                        st.plotly_chart(fig, theme=None, use_container_width=True)
+                                                query = f"select quater , sum(top_transaction_count) from public.top_transaction_pincode where top_transaction_pincode = {pincode} and year = '{year}' group by quater order by quater asc"
+                                                cursor.execute(query)
+                                                res = [i for i in cursor.fetchall()]
+                                                df = pd.DataFrame(res, columns=['Quater', 'Transaction Count'])
+                                                fig = px.line(df, x="Quater", y="Transaction Count", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
+                                                fig.update_layout(title_x=1)
+                                                fig.update_layout(
+                                                    plot_bgcolor='#0E1117',
+                                                    paper_bgcolor='#0E1117',
+                                                    xaxis_title_font=dict(color='#1BD4BD'),
+                                                    yaxis_title_font=dict(color='#1BD4BD')
+                                                )
+                                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                                  hoverlabel_font_color="#1BD4BD")
+                                                fig.update_traces(marker_color='#FFFFFF')
+                                                with c2.expander(f"{option} in pincode {pincode} Over the quaters of {year}"):
+                                                   st.plotly_chart(fig, theme=None, use_container_width=True)
 
 
 
+                                        elif option == "Registered Users":
+
+                                            query = f"select quater , sum(top_registered_users) from public.top_user_pincode where top_user_pincode = {pincode} and year = '{year}' group by quater order by quater asc"
+
+                                            cursor.execute(query)
+                                            res = [i for i in cursor.fetchall()]
+                                            df = pd.DataFrame(res, columns=['Quater', 'Registered Users'])
+                                            fig = px.line(df, x="Quater", y="Registered Users", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
+                                            fig.update_layout(title_x=1)
+                                            fig.update_layout(
+                                                plot_bgcolor='#0E1117',
+                                                paper_bgcolor='#0E1117',
+                                                xaxis_title_font=dict(color='#1BD4BD'),
+                                                yaxis_title_font=dict(color='#1BD4BD')
+                                            )
+                                            fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                              hoverlabel_font_color="#1BD4BD")
+                                            fig.update_traces(marker_color='#FFFFFF')
+                                            with c2.expander(f"{option} in pincode {pincode} Over the quaters of {year}"):
+                                                st.plotly_chart(fig, theme=None, use_container_width=True)
+
+                                        elif option == 'App Opens':
+                                            st.code('Phonepe has not provided app opens data for pincode')
+
+                                st.write("")
+                                st.write("")
+                                st.write("")
+                                st.write("")
+
+                               #_____________________________________________________________________________________________________________________________________________________________________________________________________________
 
 
+                                st.write("")
 
+                                c1, c2, c3 = st.columns([17, 10,17])
 
-                        #___________________________________________________________________________DISTRICT YEAR WISE _____________________________________________________________________
-                        elif select == "District":
+                                with c2:
+                                    colored_header(
+                                        label="OVERALL YEAR ANALYSIS",
+                                        description="",
+                                        color_name="blue-green-70", )
 
-                            if option == 'Transaction Amount':
+                                #__________________________________________________________________________________________________________________________________________________________________________________________________________________
+                                st.write("")
+                                c1, c2, c3 = st.columns([1, 100, 1])
 
-                                query = f"select year , sum(map_transaction_amount) from public.map_transaction where map_transaction_district = '{dist_selected}'  group by year order by year asc"
+                                # # 1)  Total Amount , Count , RU By state , year , District
 
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res, columns=['Year', 'Transaction Amount'])
-                                fig = px.line(df, x="Year", y="Transaction Amount", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#1BD4BD'),
-                                    yaxis_title_font=dict(color='#1BD4BD')
-                                )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#1BD4BD")
-                                fig.update_traces(marker_color='#FFFFFF')
-                                with c2.expander(f"{option} in {dist_selected}  Over The Years From 2018 To 2022"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
-
-                            elif option == "Transaction Count":
-
-                                query = f"select year , sum(map_transaction_count) from public.map_transaction where  map_transaction_district = '{dist_selected}'  group by year order by year asc;"
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res, columns=['Year', 'Transaction Count'])
-                                fig = px.line(df, x="Year", y="Transaction Count", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#1BD4BD'),
-                                    yaxis_title_font=dict(color='#1BD4BD')
-                                )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#1BD4BD")
-                                fig.update_traces(marker_color='#FFFFFF')
-                                with c2.expander(f"{option} in {dist_selected}  Over The Years From 2018 To 2022"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
-
-
-
-                            elif option == "Registered Users":
-
-                                query = f"select year , sum(map_registered_users)  from public.map_user where  map_user_district = '{dist_selected}'  group by year order by year asc;"
-
-                                cursor.execute(query)
-                                res = [i for i in cursor.fetchall()]
-                                df = pd.DataFrame(res, columns=['Quater', 'Registered Users'])
-                                fig = px.line(df, x="Quater", y="Registered Users", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
-                                fig.update_layout(title_x=1)
-                                fig.update_layout(
-                                    plot_bgcolor='#0E1117',
-                                    paper_bgcolor='#0E1117',
-                                    xaxis_title_font=dict(color='#1BD4BD'),
-                                    yaxis_title_font=dict(color='#1BD4BD')
-                                )
-                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                  hoverlabel_font_color="#1BD4BD")
-                                fig.update_traces(marker_color='#FFFFFF')
-                                with c2.expander(f"{option} in {dist_selected}  Over The Years From 2018 To 2022"):
-                                    st.plotly_chart(fig, theme=None, use_container_width=True)
-
-                            elif option == "App Opens":
-
-                                    query = f"select year , sum(map_appopens) from public.map_user where map_user_district = '{dist_selected}'  group by year order by year asc"
-
-                                    cursor.execute(query)
-                                    res = [i for i in cursor.fetchall()]
-                                    df = pd.DataFrame(res, columns=['Year', 'App Opens'])
-                                    fig = px.line(df, x="Year", y="App Opens", markers='D',
-                                                  color_discrete_sequence=['#1BD4BD', '#0AD6CD'])
-                                    fig.update_layout(title_x=1)
-                                    fig.update_layout(
-                                        plot_bgcolor='#0E1117',
-                                        paper_bgcolor='#0E1117',
-                                        xaxis_title_font=dict(color='#1BD4BD'),
-                                        yaxis_title_font=dict(color='#1BD4BD')
-                                    )
-                                    fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                      hoverlabel_font_color="#1BD4BD")
-                                    fig.update_traces(marker_color='#FFFFFF')
-                                    with c2.expander(f"{option} in {dist_selected}  Over The Years From 2018 To 2022"):
-                                        st.plotly_chart(fig, theme=None, use_container_width=True)
-
-                        elif select == "Pincode":
+                                if select == "State":
 
                                     if option == 'Transaction Amount':
 
-                                        query = f"select year , sum(top_transaction_amount) from public.top_transaction_pincode where top_transaction_pincode = {pincode}  group by year order by year asc"
+                                        query = f"select year , sum(map_transaction_amount) from public.map_transaction where state = '{state_selected}'  group by year order by year asc"
 
                                         cursor.execute(query)
                                         res = [i for i in cursor.fetchall()]
                                         df = pd.DataFrame(res, columns=['Year', 'Transaction Amount'])
-                                        fig = px.line(df, x="Year", y="Transaction Amount", markers='D',
-                                                      color_discrete_sequence=['#1BD4BD', '#0AD6CD'])
+                                        fig = px.line(df, x="Year", y="Transaction Amount", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
                                         fig.update_layout(title_x=1)
                                         fig.update_layout(
                                             plot_bgcolor='#0E1117',
@@ -3137,17 +2995,16 @@ class Phonepe_pulse:
                                         fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
                                                           hoverlabel_font_color="#1BD4BD")
                                         fig.update_traces(marker_color='#FFFFFF')
-                                        with c2.expander(f"{option} in {pincode}  Over The Years From 2018 To 2022"):
+                                        with c2.expander(f"{option} in {state_selected}  Over The Years From 2018 To 2022"):
                                             st.plotly_chart(fig, theme=None, use_container_width=True)
 
                                     elif option == "Transaction Count":
 
-                                        query = f"select year , sum(top_transaction_count) from public.top_transaction_pincode where top_transaction_pincode = {pincode}  group by year order by year asc"
+                                        query = f"select year , sum(map_transaction_count) from public.map_transaction where state = '{state_selected}'  group by year order by year asc;"
                                         cursor.execute(query)
                                         res = [i for i in cursor.fetchall()]
                                         df = pd.DataFrame(res, columns=['Year', 'Transaction Count'])
-                                        fig = px.line(df, x="Year", y="Transaction Count", markers='D',
-                                                      color_discrete_sequence=['#1BD4BD', '#0AD6CD'])
+                                        fig = px.line(df, x="Year", y="Transaction Count", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
                                         fig.update_layout(title_x=1)
                                         fig.update_layout(
                                             plot_bgcolor='#0E1117',
@@ -3158,20 +3015,19 @@ class Phonepe_pulse:
                                         fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
                                                           hoverlabel_font_color="#1BD4BD")
                                         fig.update_traces(marker_color='#FFFFFF')
-                                        with c2.expander(f"{option} in {pincode}  Over The Years From 2018 To 2022"):
+                                        with c2.expander(f"{option} in {state_selected}  Over The Years From 2018 To 2022"):
                                             st.plotly_chart(fig, theme=None, use_container_width=True)
 
 
 
                                     elif option == "Registered Users":
 
-                                        query = f"select year , sum(top_registered_users) from public.top_user_pincode where top_user_pincode = {pincode}  group by year order by year asc"
+                                        query = f"select year , sum(map_registered_users)  from public.map_user where state = '{state_selected}'  group by year order by year asc;"
 
                                         cursor.execute(query)
                                         res = [i for i in cursor.fetchall()]
                                         df = pd.DataFrame(res, columns=['Year', 'Registered Users'])
-                                        fig = px.line(df, x="Year", y="Registered Users", markers='D',
-                                                      color_discrete_sequence=['#1BD4BD', '#0AD6CD'])
+                                        fig = px.line(df, x="Year", y="Registered Users", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
                                         fig.update_layout(title_x=1)
                                         fig.update_layout(
                                             plot_bgcolor='#0E1117',
@@ -3182,288 +3038,496 @@ class Phonepe_pulse:
                                         fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
                                                           hoverlabel_font_color="#1BD4BD")
                                         fig.update_traces(marker_color='#FFFFFF')
-                                        with c2.expander(f"{option} in {pincode}  Over The Years From 2018 To 2022"):
+                                        with c2.expander(f"{option} in {state_selected}  Over The Years From 2018 To 2022"):
                                             st.plotly_chart(fig, theme=None, use_container_width=True)
 
-                        st.write("")
-                        st.write("")
-                        st.write("")
-                        st.write("")
+                                    elif option == "App Opens":
 
-                        colored_header(
-                            label="CONCLUSION",
-                            description="Using This Dashboard User Can Anlaysis The Specific State or District or Pincode in Over the Specific Time Period To Get Insights About Transactions And User Engagement",
-                            color_name="blue-green-70", )
+                                            query = f"select year , sum(map_appopens)  from public.map_user where  state = '{state_selected}' group by year order by year asc"
+
+                                            cursor.execute(query)
+                                            res = [i for i in cursor.fetchall()]
+                                            df = pd.DataFrame(res, columns=['Year', 'App Opens'])
+                                            fig = px.line(df, x="Year", y="App Opens", markers='D',
+                                                          color_discrete_sequence=['#1BD4BD', '#0AD6CD'])
+                                            fig.update_layout(title_x=1)
+                                            fig.update_layout(
+                                                plot_bgcolor='#0E1117',
+                                                paper_bgcolor='#0E1117',
+                                                xaxis_title_font=dict(color='#1BD4BD'),
+                                                yaxis_title_font=dict(color='#1BD4BD')
+                                            )
+                                            fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                              hoverlabel_font_color="#1BD4BD")
+                                            fig.update_traces(marker_color='#FFFFFF')
+                                            with c2.expander(f"{option} in {state_selected}  Over The Years From 2018 To 2022"):
+                                                st.plotly_chart(fig, theme=None, use_container_width=True)
+
+                                #___________________________________________________________________________DISTRICT YEAR WISE _____________________________________________________________________
+                                elif select == "District":
+
+                                    if option == 'Transaction Amount':
+
+                                        query = f"select year , sum(map_transaction_amount) from public.map_transaction where map_transaction_district = '{dist_selected}'  group by year order by year asc"
+
+                                        cursor.execute(query)
+                                        res = [i for i in cursor.fetchall()]
+                                        df = pd.DataFrame(res, columns=['Year', 'Transaction Amount'])
+                                        fig = px.line(df, x="Year", y="Transaction Amount", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
+                                        fig.update_layout(title_x=1)
+                                        fig.update_layout(
+                                            plot_bgcolor='#0E1117',
+                                            paper_bgcolor='#0E1117',
+                                            xaxis_title_font=dict(color='#1BD4BD'),
+                                            yaxis_title_font=dict(color='#1BD4BD')
+                                        )
+                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                          hoverlabel_font_color="#1BD4BD")
+                                        fig.update_traces(marker_color='#FFFFFF')
+                                        with c2.expander(f"{option} in {dist_selected}  Over The Years From 2018 To 2022"):
+                                            st.plotly_chart(fig, theme=None, use_container_width=True)
+
+                                    elif option == "Transaction Count":
+
+                                        query = f"select year , sum(map_transaction_count) from public.map_transaction where  map_transaction_district = '{dist_selected}'  group by year order by year asc;"
+                                        cursor.execute(query)
+                                        res = [i for i in cursor.fetchall()]
+                                        df = pd.DataFrame(res, columns=['Year', 'Transaction Count'])
+                                        fig = px.line(df, x="Year", y="Transaction Count", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
+                                        fig.update_layout(title_x=1)
+                                        fig.update_layout(
+                                            plot_bgcolor='#0E1117',
+                                            paper_bgcolor='#0E1117',
+                                            xaxis_title_font=dict(color='#1BD4BD'),
+                                            yaxis_title_font=dict(color='#1BD4BD')
+                                        )
+                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                          hoverlabel_font_color="#1BD4BD")
+                                        fig.update_traces(marker_color='#FFFFFF')
+                                        with c2.expander(f"{option} in {dist_selected}  Over The Years From 2018 To 2022"):
+                                            st.plotly_chart(fig, theme=None, use_container_width=True)
+
+
+
+                                    elif option == "Registered Users":
+
+                                        query = f"select year , sum(map_registered_users)  from public.map_user where  map_user_district = '{dist_selected}'  group by year order by year asc;"
+
+                                        cursor.execute(query)
+                                        res = [i for i in cursor.fetchall()]
+                                        df = pd.DataFrame(res, columns=['Quater', 'Registered Users'])
+                                        fig = px.line(df, x="Quater", y="Registered Users", markers='D',color_discrete_sequence=['#1BD4BD','#0AD6CD'])
+                                        fig.update_layout(title_x=1)
+                                        fig.update_layout(
+                                            plot_bgcolor='#0E1117',
+                                            paper_bgcolor='#0E1117',
+                                            xaxis_title_font=dict(color='#1BD4BD'),
+                                            yaxis_title_font=dict(color='#1BD4BD')
+                                        )
+                                        fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                          hoverlabel_font_color="#1BD4BD")
+                                        fig.update_traces(marker_color='#FFFFFF')
+                                        with c2.expander(f"{option} in {dist_selected}  Over The Years From 2018 To 2022"):
+                                            st.plotly_chart(fig, theme=None, use_container_width=True)
+
+                                    elif option == "App Opens":
+
+                                            query = f"select year , sum(map_appopens) from public.map_user where map_user_district = '{dist_selected}'  group by year order by year asc"
+
+                                            cursor.execute(query)
+                                            res = [i for i in cursor.fetchall()]
+                                            df = pd.DataFrame(res, columns=['Year', 'App Opens'])
+                                            fig = px.line(df, x="Year", y="App Opens", markers='D',
+                                                          color_discrete_sequence=['#1BD4BD', '#0AD6CD'])
+                                            fig.update_layout(title_x=1)
+                                            fig.update_layout(
+                                                plot_bgcolor='#0E1117',
+                                                paper_bgcolor='#0E1117',
+                                                xaxis_title_font=dict(color='#1BD4BD'),
+                                                yaxis_title_font=dict(color='#1BD4BD')
+                                            )
+                                            fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                              hoverlabel_font_color="#1BD4BD")
+                                            fig.update_traces(marker_color='#FFFFFF')
+                                            with c2.expander(f"{option} in {dist_selected}  Over The Years From 2018 To 2022"):
+                                                st.plotly_chart(fig, theme=None, use_container_width=True)
+
+                                elif select == "Pincode":
+
+                                            if option == 'Transaction Amount':
+
+                                                query = f"select year , sum(top_transaction_amount) from public.top_transaction_pincode where top_transaction_pincode = {pincode}  group by year order by year asc"
+
+                                                cursor.execute(query)
+                                                res = [i for i in cursor.fetchall()]
+                                                df = pd.DataFrame(res, columns=['Year', 'Transaction Amount'])
+                                                fig = px.line(df, x="Year", y="Transaction Amount", markers='D',
+                                                              color_discrete_sequence=['#1BD4BD', '#0AD6CD'])
+                                                fig.update_layout(title_x=1)
+                                                fig.update_layout(
+                                                    plot_bgcolor='#0E1117',
+                                                    paper_bgcolor='#0E1117',
+                                                    xaxis_title_font=dict(color='#1BD4BD'),
+                                                    yaxis_title_font=dict(color='#1BD4BD')
+                                                )
+                                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                                  hoverlabel_font_color="#1BD4BD")
+                                                fig.update_traces(marker_color='#FFFFFF')
+                                                with c2.expander(f"{option} in {pincode}  Over The Years From 2018 To 2022"):
+                                                    st.plotly_chart(fig, theme=None, use_container_width=True)
+
+                                            elif option == "Transaction Count":
+
+                                                query = f"select year , sum(top_transaction_count) from public.top_transaction_pincode where top_transaction_pincode = {pincode}  group by year order by year asc"
+                                                cursor.execute(query)
+                                                res = [i for i in cursor.fetchall()]
+                                                df = pd.DataFrame(res, columns=['Year', 'Transaction Count'])
+                                                fig = px.line(df, x="Year", y="Transaction Count", markers='D',
+                                                              color_discrete_sequence=['#1BD4BD', '#0AD6CD'])
+                                                fig.update_layout(title_x=1)
+                                                fig.update_layout(
+                                                    plot_bgcolor='#0E1117',
+                                                    paper_bgcolor='#0E1117',
+                                                    xaxis_title_font=dict(color='#1BD4BD'),
+                                                    yaxis_title_font=dict(color='#1BD4BD')
+                                                )
+                                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                                  hoverlabel_font_color="#1BD4BD")
+                                                fig.update_traces(marker_color='#FFFFFF')
+                                                with c2.expander(f"{option} in {pincode}  Over The Years From 2018 To 2022"):
+                                                    st.plotly_chart(fig, theme=None, use_container_width=True)
+
+
+
+                                            elif option == "Registered Users":
+
+                                                query = f"select year , sum(top_registered_users) from public.top_user_pincode where top_user_pincode = {pincode}  group by year order by year asc"
+
+                                                cursor.execute(query)
+                                                res = [i for i in cursor.fetchall()]
+                                                df = pd.DataFrame(res, columns=['Year', 'Registered Users'])
+                                                fig = px.line(df, x="Year", y="Registered Users", markers='D',
+                                                              color_discrete_sequence=['#1BD4BD', '#0AD6CD'])
+                                                fig.update_layout(title_x=1)
+                                                fig.update_layout(
+                                                    plot_bgcolor='#0E1117',
+                                                    paper_bgcolor='#0E1117',
+                                                    xaxis_title_font=dict(color='#1BD4BD'),
+                                                    yaxis_title_font=dict(color='#1BD4BD')
+                                                )
+                                                fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                                  hoverlabel_font_color="#1BD4BD")
+                                                fig.update_traces(marker_color='#FFFFFF')
+                                                with c2.expander(f"{option} in {pincode}  Over The Years From 2018 To 2022"):
+                                                    st.plotly_chart(fig, theme=None, use_container_width=True)
+                                            elif option == 'App Opens':
+                                                st.code('Phonepe has not provided app opens data for pincode')
+                                st.write("")
+                                st.write("")
+                                st.write("")
+                                st.write("")
+
+                                colored_header(
+                                    label="CONCLUSION",
+                                    description="Using This Dashboard User Can Anlaysis The Specific State or District or Pincode in Over the Specific Time Period To Get Insights About Transactions And User Engagement",
+                                    color_name="blue-green-70", )
                     #________________________________________________________________________________________________________________________________________________________________________________________________________________________
                     elif selected == 'GeoPlot Pulse Analysis':
 
-                        st.markdown("<style>div.block-container{padding-top:1rem;}</style>", unsafe_allow_html=True)
+                        st.markdown("<style>div.block-container{padding-top:3rem;}</style>", unsafe_allow_html=True)
 
+                        explore_1 = option_menu(
+                            menu_title="",
+                            options=['Click', 'Explore Dashboard'],
+                            icons=['arrow-right-circle-fill', 'eye-fill'],
+                            menu_icon='',
+                            default_index=0,
+                            orientation='horizontal'
+                        )
 
-                        colored_header(
-                            label="GeoPlot Pulse Analysis",
-                            description="",
-                            color_name="blue-green-70", )
+                        if explore_1 == 'Click':
+                            # animation
+                            def lottie(filepath):
+                                with open(filepath, 'r') as file:
+                                    return js.load(file)
 
-                        # animation
-                        def lottie(filepath):
-                            with open(filepath, 'r') as file:
-                                return js.load(file)
+                            col1, col2, col3 = st.columns([5, 10, 5])
 
-                        col1, col2, col3 = st.columns([5, 10, 5])
-                        with col2:
-                            file = lottie("map2.json")
-                            st_lottie(
-                                file,
-                                speed=1,
-                                reverse=False,
-                                loop=True,
-                                quality='low',
-                                # renderer='svg',
-                                height=600,
-                                width=600,
-                                key=None
-                            )
+                            def lottie(filepath):
+                                with open(filepath, 'r') as file:
+                                    return js.load(file)
 
-                        st.write("")
-                        st.write("")
+                            col1, col2, col3 = st.columns([5, 10, 5])
+                            with col2:
+                                file = lottie("map2.json")
+                                st_lottie(
+                                    file,
+                                    speed=1,
+                                    reverse=False,
+                                    loop=True,
+                                    quality='low',
+                                    # renderer='svg',
+                                    height=550,
+                                    width=500,
+                                    key=None
+                                )
 
-                        st.write("")
-                        st.write("")
+                            col1, col2, col3 = st.columns([7, 10, 5])
+                            col2.markdown("<h1 style='font-size: 50px;'><span style='color: cyan;'>Geo</span> <span style='color: white;'>Plot</span> <span style='color: cyan;'>Analysis</span></h1>",unsafe_allow_html=True)
 
+                        elif explore_1 == 'Explore Dashboard':
 
-                        style_metric_cards(
-                            border_left_color='#08EED2',
-                            background_color='#0E1117', border_color="#0E1117")
+                                st.write("")
+                                st.write("")
 
+                                colored_header(
+                                    label="GeoPlot Pulse Analysis",
+                                    description="",
+                                    color_name="blue-green-70", )
 
 
-                        col1,col2,col3 = st.columns([5,10,5])
 
 
-                        with col2.expander('Filter'):
-                            option = st.selectbox('OPTION',['Transaction Amount','Transaction Count','Registered Users','App Opens'])
 
 
-                        st.write('')
-                        st.write('')
+                                style_metric_cards(
+                                    border_left_color='#08EED2',
+                                    background_color='#0E1117', border_color="#0E1117")
 
-                        if option == 'Transaction Amount':
+                                st.write("")
+                                st.write("")
 
+                                col1,col2,col3 = st.columns([5,10,5])
 
-                            query = f"select state , sum(map_transaction_amount) from public.map_transaction   group by state"
 
-                            cursor.execute(query)
+                                with col2.expander('Filter'):
+                                    option = st.selectbox('OPTION',['Transaction Amount','Transaction Count','Registered Users','App Opens'])
 
-                            res = [i for i in cursor.fetchall()]
 
-                            Map_transaction_df = pd.DataFrame(res,columns=['state','Total Transaction Amount'])
+                                st.write('')
+                                st.write('')
 
-                            a_t2 = Map_transaction_df[['state', 'Total Transaction Amount']]
-                            a_t2 = a_t2.sort_values(by='state')
-                            url = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson"
-                            response = rs.get(url)
-                            data1 = js.loads(response.content)
-                            print(data1)
-                            state_names_tra = [feature['properties']['ST_NM'] for feature in data1['features']]
-                            state_names_tra.sort()
+                                if option == 'Transaction Amount':
 
-                            df_state_names_tra = pd.DataFrame({'state': state_names_tra})
 
-                            a_t2['state'] = a_t2['state'].str.replace('-', ' ')
-                            a_t2['state'] = a_t2['state'].str.replace('Dadra & Nagar Haveli & Daman & Diu',
-                                                                      'Dadra and Nagar Haveli and Daman and Diu')
-                            a_t2['state'] = a_t2['state'].str.replace('Andaman & Nicobar Islands', 'Andaman & Nicobar')
-                            a_t2['state'] = a_t2['state'].str.title()
+                                    query = f"select state , sum(map_transaction_amount) from public.map_transaction   group by state"
 
-                            merge_df = df_state_names_tra.merge(a_t2, on='state')
+                                    cursor.execute(query)
 
-                            trans_fig = px.choropleth_mapbox(merge_df,
-                                                             geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
-                                                             featureidkey='properties.ST_NM', locations='state', color='Total Transaction Amount',
-                                                             color_continuous_scale=['#C8E2E3 ', '#12F6FF'], range_color=(0, 20000000000000),
-                                                             height=1000, zoom=4, center={"lat": 20.5937, "lon": 78.9629}
-                                                             )
+                                    res = [i for i in cursor.fetchall()]
 
-                            trans_fig.update_geos(fitbounds="locations", visible=False)
-                            trans_fig.update_layout(title_font=dict(size=33), title_font_color='#6739b7',
-                                                    coloraxis_colorbar_title="Total Transaction Amount",  # Set plot background color to black
-                                                    paper_bgcolor='black',width=800
+                                    Map_transaction_df = pd.DataFrame(res,columns=['state','Total Transaction Amount'])
 
-                                                    )
 
-                            trans_fig.update_layout(mapbox_style="open-street-map")
-                            trans_fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                                    a_t2 = Map_transaction_df[['state', 'Total Transaction Amount']]
+                                    a_t2 = a_t2.sort_values(by='state')
+                                    url = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson"
+                                    response = rs.get(url)
+                                    data1 = js.loads(response.content)
+                                    print(data1)
+                                    state_names_tra = [feature['properties']['ST_NM'] for feature in data1['features']]
+                                    state_names_tra.sort()
 
-                            trans_fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                    hoverlabel_font_color="#12F6FF")
-                            st.plotly_chart(trans_fig,use_container_width=True, width=450)
+                                    df_state_names_tra = pd.DataFrame({'state': state_names_tra})
 
-                        elif option == 'Transaction Count':
+                                    a_t2['state'] = a_t2['state'].str.replace('-', ' ')
+                                    a_t2['state'] = a_t2['state'].str.replace('Dadra & Nagar Haveli & Daman & Diu',
+                                                                              'Dadra and Nagar Haveli and Daman and Diu')
+                                    a_t2['state'] = a_t2['state'].str.replace('Andaman & Nicobar Islands', 'Andaman & Nicobar')
+                                    a_t2['state'] = a_t2['state'].str.title()
 
+                                    merge_df = df_state_names_tra.merge(a_t2, on='state')
 
-                            query = f"select state , sum(map_transaction_count) from public.map_transaction group by state "
+                                    trans_fig = px.choropleth_mapbox(merge_df,
+                                                                     geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
+                                                                     featureidkey='properties.ST_NM', locations='state', color='Total Transaction Amount',
+                                                                     color_continuous_scale=['#C8E2E3 ', '#12F6FF'], range_color=(0, 20000000000000),
+                                                                     height=1000, zoom=4, center={"lat": 20.5937, "lon": 78.9629}
+                                                                     )
 
-                            cursor.execute(query)
+                                    trans_fig.update_geos(fitbounds="locations", visible=False)
+                                    trans_fig.update_layout(title_font=dict(size=33), title_font_color='#6739b7',
+                                                            coloraxis_colorbar_title="Total Transaction Amount",  # Set plot background color to black
+                                                            paper_bgcolor='black',width=800
 
-                            res = [i for i in cursor.fetchall()]
+                                                            )
 
-                            Map_transaction_df = pd.DataFrame(res,columns=['state','Total Transaction Count'])
+                                    trans_fig.update_layout(mapbox_style="open-street-map")
+                                    trans_fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
 
-                            a_t2 = Map_transaction_df[['state', 'Total Transaction Count']]
-                            a_t2 = a_t2.sort_values(by='state')
-                            url = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson"
-                            response = rs.get(url)
-                            data1 = js.loads(response.content)
-                            print(data1)
-                            state_names_tra = [feature['properties']['ST_NM'] for feature in data1['features']]
-                            state_names_tra.sort()
+                                    trans_fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                            hoverlabel_font_color="#12F6FF")
+                                    st.plotly_chart(trans_fig,use_container_width=True, width=450)
 
-                            df_state_names_tra = pd.DataFrame({'state': state_names_tra})
+                                elif option == 'Transaction Count':
 
-                            a_t2['state'] = a_t2['state'].str.replace('-', ' ')
-                            a_t2['state'] = a_t2['state'].str.replace('Dadra & Nagar Haveli & Daman & Diu',
-                                                                      'Dadra and Nagar Haveli and Daman and Diu')
-                            a_t2['state'] = a_t2['state'].str.replace('Andaman & Nicobar Islands', 'Andaman & Nicobar')
-                            a_t2['state'] = a_t2['state'].str.title()
 
-                            merge_df = df_state_names_tra.merge(a_t2, on='state')
+                                    query = f"select state , sum(map_transaction_count) from public.map_transaction group by state "
 
-                            trans_fig = px.choropleth_mapbox(merge_df,
-                                                             geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
-                                                             featureidkey='properties.ST_NM', locations='state', color='Total Transaction Count',
-                                                             color_continuous_scale=['#C8E2E3 ', '#12F6FF'], range_color=(0, 20000000000),
-                                                             height=1000, zoom=4, center={"lat": 20.5937, "lon": 78.9629}
-                                                             )
+                                    cursor.execute(query)
 
-                            trans_fig.update_geos(fitbounds="locations", visible=False)
-                            trans_fig.update_layout(title_font=dict(size=33), title_font_color='#6739b7',
-                                                    coloraxis_colorbar_title="Total Transaction Count",  # Set plot background color to black
-                                                    paper_bgcolor='black',width=800
+                                    res = [i for i in cursor.fetchall()]
 
-                                                    )
+                                    Map_transaction_df = pd.DataFrame(res,columns=['state','Total Transaction Count'])
 
-                            trans_fig.update_layout(mapbox_style="open-street-map")
-                            trans_fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                                    Map_transaction_df['Total Transaction Count'] = Map_transaction_df['Total Transaction Count'].apply(lambda x: f'{round((x/1000),2)}T' )
 
-                            trans_fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                    hoverlabel_font_color="#12F6FF")
-                            st.plotly_chart(trans_fig,use_container_width=True, width=450)
+                                    a_t2 = Map_transaction_df[['state', 'Total Transaction Count']]
+                                    a_t2 = a_t2.sort_values(by='state')
+                                    url = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson"
+                                    response = rs.get(url)
+                                    data1 = js.loads(response.content)
+                                    print(data1)
+                                    state_names_tra = [feature['properties']['ST_NM'] for feature in data1['features']]
+                                    state_names_tra.sort()
 
-                        elif option == 'Registered Users':
+                                    df_state_names_tra = pd.DataFrame({'state': state_names_tra})
 
-                            query = f"select state , sum(map_registered_users) from public.map_user group by state"
+                                    a_t2['state'] = a_t2['state'].str.replace('-', ' ')
+                                    a_t2['state'] = a_t2['state'].str.replace('Dadra & Nagar Haveli & Daman & Diu',
+                                                                              'Dadra and Nagar Haveli and Daman and Diu')
+                                    a_t2['state'] = a_t2['state'].str.replace('Andaman & Nicobar Islands', 'Andaman & Nicobar')
+                                    a_t2['state'] = a_t2['state'].str.title()
 
-                            cursor.execute(query)
+                                    merge_df = df_state_names_tra.merge(a_t2, on='state')
 
-                            res = [i for i in cursor.fetchall()]
+                                    trans_fig = px.choropleth_mapbox(merge_df,
+                                                                     geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
+                                                                     featureidkey='properties.ST_NM', locations='state', color='Total Transaction Count',
+                                                                     color_continuous_scale=['#C8E2E3 ', '#12F6FF'], range_color=(0, 20000000000),
+                                                                     height=1000, zoom=4, center={"lat": 20.5937, "lon": 78.9629}
+                                                                     )
 
-                            Map_transaction_df = pd.DataFrame(res, columns=['state', 'Registered Users'])
+                                    trans_fig.update_geos(fitbounds="locations", visible=False)
+                                    trans_fig.update_layout(title_font=dict(size=33), title_font_color='#6739b7',
+                                                            coloraxis_colorbar_title="Total Transaction Count",  # Set plot background color to black
+                                                            paper_bgcolor='black',width=800
 
-                            a_t2 = Map_transaction_df[['state', 'Registered Users']]
-                            a_t2 = a_t2.sort_values(by='state')
-                            url = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson"
-                            response = rs.get(url)
-                            data1 = js.loads(response.content)
-                            print(data1)
-                            state_names_tra = [feature['properties']['ST_NM'] for feature in data1['features']]
-                            state_names_tra.sort()
+                                                            )
 
-                            df_state_names_tra = pd.DataFrame({'state': state_names_tra})
+                                    trans_fig.update_layout(mapbox_style="open-street-map")
+                                    trans_fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
 
-                            a_t2['state'] = a_t2['state'].str.replace('-', ' ')
-                            a_t2['state'] = a_t2['state'].str.replace('Dadra & Nagar Haveli & Daman & Diu',
-                                                                      'Dadra and Nagar Haveli and Daman and Diu')
-                            a_t2['state'] = a_t2['state'].str.replace('Andaman & Nicobar Islands', 'Andaman & Nicobar')
-                            a_t2['state'] = a_t2['state'].str.title()
+                                    trans_fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                            hoverlabel_font_color="#12F6FF")
+                                    st.plotly_chart(trans_fig,use_container_width=True, width=450)
 
-                            merge_df = df_state_names_tra.merge(a_t2, on='state')
+                                elif option == 'Registered Users':
 
-                            trans_fig = px.choropleth_mapbox(merge_df,
-                                                             geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
-                                                             featureidkey='properties.ST_NM', locations='state',
-                                                             color='Registered Users',
-                                                             color_continuous_scale=['#C8E2E3 ', '#12F6FF'],
-                                                             range_color=(0, 200000000000000000),
-                                                             height=1000, zoom=4,
-                                                             center={"lat": 20.5937, "lon": 78.9629},
+                                    query = f"select state , sum(map_registered_users) from public.map_user group by state"
 
+                                    cursor.execute(query)
 
-                                                             )
+                                    res = [i for i in cursor.fetchall()]
 
-                            trans_fig.update_geos(fitbounds="locations", visible=False)
-                            trans_fig.update_layout(title_font=dict(size=33), title_font_color='#6739b7',
-                                                    coloraxis_colorbar_title="Registered Users",
-                                                    # Set plot background color to black
-                                                    paper_bgcolor='black', width=800
+                                    Map_transaction_df = pd.DataFrame(res, columns=['state', 'Registered Users'])
+                                    Map_transaction_df['Registered Users'] = Map_transaction_df['Registered Users'].apply(lambda x: f'{round((x/1000),2)}T' )
 
-                                                    )
 
-                            trans_fig.update_layout(mapbox_style="open-street-map")
-                            trans_fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                                    a_t2 = Map_transaction_df[['state', 'Registered Users']]
+                                    a_t2 = a_t2.sort_values(by='state')
+                                    url = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson"
+                                    response = rs.get(url)
+                                    data1 = js.loads(response.content)
+                                    print(data1)
+                                    state_names_tra = [feature['properties']['ST_NM'] for feature in data1['features']]
+                                    state_names_tra.sort()
 
-                            trans_fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                    hoverlabel_font_color="#12F6FF")
-                            st.plotly_chart(trans_fig, use_container_width=True, width=450)
+                                    df_state_names_tra = pd.DataFrame({'state': state_names_tra})
 
+                                    a_t2['state'] = a_t2['state'].str.replace('-', ' ')
+                                    a_t2['state'] = a_t2['state'].str.replace('Dadra & Nagar Haveli & Daman & Diu',
+                                                                              'Dadra and Nagar Haveli and Daman and Diu')
+                                    a_t2['state'] = a_t2['state'].str.replace('Andaman & Nicobar Islands', 'Andaman & Nicobar')
+                                    a_t2['state'] = a_t2['state'].str.title()
 
-                       #___________________________________________________________________________________________________________________________________________________________________
+                                    merge_df = df_state_names_tra.merge(a_t2, on='state')
 
-                        elif option == 'App Opens':
+                                    trans_fig = px.choropleth_mapbox(merge_df,
+                                                                     geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
+                                                                     featureidkey='properties.ST_NM', locations='state',
+                                                                     color='Registered Users',
+                                                                     color_continuous_scale='blues',
+                                                                     range_color=(0, 200000000000000000),
+                                                                     height=1000, zoom=4,
+                                                                     center={"lat": 20.5937, "lon": 78.9629},
 
-                            query = f"select state, sum(map_appopens) from public.map_user group by state"
-                            cursor.execute(query)
-                            res = [i for i in cursor.fetchall()]
-                            Map_transaction_df = pd.DataFrame(res, columns=['state', 'App Opens'])
-                            a_t2 = Map_transaction_df[['state', 'App Opens']]
-                            a_t2 = a_t2.sort_values(by='state')
-                            url = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson"
-                            response = rs.get(url)
-                            data1 = js.loads(response.content)
-                            print(data1)
-                            state_names_tra = [feature['properties']['ST_NM'] for feature in data1['features']]
-                            state_names_tra.sort()
 
-                            df_state_names_tra = pd.DataFrame({'state': state_names_tra})
+                                                                     )
 
-                            a_t2['state'] = a_t2['state'].str.replace('-', ' ')
-                            a_t2['state'] = a_t2['state'].str.replace('Dadra & Nagar Haveli & Daman & Diu',
-                                                                      'Dadra and Nagar Haveli and Daman and Diu')
-                            a_t2['state'] = a_t2['state'].str.replace('Andaman & Nicobar Islands', 'Andaman & Nicobar')
-                            a_t2['state'] = a_t2['state'].str.title()
+                                    trans_fig.update_geos(fitbounds="locations", visible=False)
+                                    trans_fig.update_layout(title_font=dict(size=33), title_font_color='#6739b7',
+                                                            coloraxis_colorbar_title="Registered Users",
+                                                            # Set plot background color to black
+                                                            paper_bgcolor='black', width=800
 
-                            merge_df = df_state_names_tra.merge(a_t2, on='state')
+                                                            )
 
-                            trans_fig = px.choropleth_mapbox(merge_df,
-                                                             geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
-                                                             featureidkey='properties.ST_NM', locations='state',
-                                                             color='App Opens',
-                                                             color_continuous_scale=['#C8E2E3 ', '#12F6FF'],
-                                                             range_color=(0, 200000000000000000),
-                                                             height=1000, zoom=4,
-                                                             center={"lat": 20.5937, "lon": 78.9629},
+                                    trans_fig.update_layout(mapbox_style="open-street-map")
+                                    trans_fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
 
-                                                             )
+                                    trans_fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                            hoverlabel_font_color="#12F6FF")
+                                    st.plotly_chart(trans_fig, use_container_width=True, width=450)
 
-                            trans_fig.update_geos(fitbounds="locations", visible=False)
-                            trans_fig.update_layout(title_font=dict(size=33), title_font_color='#6739b7',
-                                                    coloraxis_colorbar_title="App Opens",
-                                                    # Set plot background color to black
-                                                    paper_bgcolor='black', width=800
+                                elif option == 'App Opens':
 
-                                                    )
+                                    query = f"select state, sum(map_appopens) from public.map_user group by state"
+                                    cursor.execute(query)
+                                    res = [i for i in cursor.fetchall()]
+                                    Map_transaction_df = pd.DataFrame(res, columns=['state', 'App Opens'])
+                                    Map_transaction_df['App Opens'] = Map_transaction_df['App Opens'].apply(lambda x: f'{round((x/1000),2)}T' )
 
-                            trans_fig.update_layout(mapbox_style="open-street-map")
-                            trans_fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+                                    a_t2 = Map_transaction_df[['state', 'App Opens']]
+                                    a_t2 = a_t2.sort_values(by='state')
+                                    url = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson"
+                                    response = rs.get(url)
+                                    data1 = js.loads(response.content)
+                                    print(data1)
+                                    state_names_tra = [feature['properties']['ST_NM'] for feature in data1['features']]
+                                    state_names_tra.sort()
 
-                            trans_fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
-                                                    hoverlabel_font_color="#12F6FF")
-                            st.plotly_chart(trans_fig, use_container_width=True, width=450)
+                                    df_state_names_tra = pd.DataFrame({'state': state_names_tra})
 
-                        colored_header(
-                            label="",
-                            description="",
-                            color_name="blue-green-70", )
+
+                                    a_t2['state'] = a_t2['state'].str.replace('-', ' ')
+                                    a_t2['state'] = a_t2['state'].str.replace('Dadra & Nagar Haveli & Daman & Diu',
+                                                                              'Dadra and Nagar Haveli and Daman and Diu')
+                                    a_t2['state'] = a_t2['state'].str.replace('Andaman & Nicobar Islands', 'Andaman & Nicobar')
+                                    a_t2['state'] = a_t2['state'].str.title()
+
+                                    merge_df = df_state_names_tra.merge(a_t2, on='state')
+
+                                    trans_fig = px.choropleth_mapbox(merge_df,
+                                                                     geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
+                                                                     featureidkey='properties.ST_NM', locations='state',
+                                                                     color='App Opens',
+                                                                     color_continuous_scale=['#C8E2E3 ', '#12F6FF'],
+                                                                     range_color=(0, 200000000000000000),
+                                                                     height=1000, zoom=4,
+                                                                     center={"lat": 20.5937, "lon": 78.9629},
+
+                                                                     )
+
+                                    trans_fig.update_geos(fitbounds="locations", visible=False)
+                                    trans_fig.update_layout(title_font=dict(size=33), title_font_color='#6739b7',
+                                                            coloraxis_colorbar_title="App Opens",
+                                                            # Set plot background color to black
+                                                            paper_bgcolor='black', width=800
+
+                                                            )
+
+                                    trans_fig.update_layout(mapbox_style="open-street-map")
+                                    trans_fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+
+                                    trans_fig.update_traces(hoverlabel=dict(bgcolor="#0E1117"),
+                                                            hoverlabel_font_color="#12F6FF")
+                                    st.plotly_chart(trans_fig, use_container_width=True, width=450)
+
+                                colored_header(
+                                    label="",
+                                    description="",
+                                    color_name="blue-green-70", )
                     #____________________________________________________________________________________________________________________________________________________________________________________________________________
                     elif selected == 'Feedback':
 
@@ -3659,7 +3723,6 @@ class Phonepe_pulse:
                             label="",
                             description="",
                             color_name="blue-green-70", )
-
                     #___________________________________________________________________________________________________________________________________
                     elif selected =='Intro':
 
@@ -3921,6 +3984,10 @@ class Phonepe_pulse:
                                 width=600,
                                 key=None
                             )
+                        colored_header(
+                            label="",
+                            description="",
+                            color_name="blue-green-70", )
 #_________________________________________________________________________________________________________________________________________________________________________________
 
 # Creation Object for Class Phonepe Pulse
@@ -3928,5 +3995,4 @@ class Phonepe_pulse:
 object = Phonepe_pulse()
 
 object.dashboard()
-#_______________________________________________________________________FINISHED___________________________________________________________________________
-#____________________________________________________________________________________________________________________________________________________
+#_______________________________________________________________________FINISHED_______________________________________________________________________________________________________________________________________________________________________________________________________________________________
