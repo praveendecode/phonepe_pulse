@@ -2518,7 +2518,7 @@ class Phonepe_pulse:
                                             st.plotly_chart(pie, theme=None, use_container_width=True)
                         #____________________________________________________________________________________________________________________________________________________________________
 
-                            if option == 'App Opens':
+                            elif option == 'App Opens':
                                 if order == 'Top 10':
                                     if vary == "District":
 
@@ -2540,8 +2540,8 @@ class Phonepe_pulse:
 
                                         with col2.expander(f"{order} District By {option}"):
                                             st.plotly_chart(fig, theme=None, use_container_width=True)
-
-
+                                    elif vary == 'Pincode':
+                                        st.code('Phonepe  has  not  provided  Appopens  Data  for  Pincode')
 
                                 elif order == 'Bottom 10':
                                     if vary == "District":
@@ -2564,14 +2564,17 @@ class Phonepe_pulse:
 
                                         with col2.expander(f"{order} District By {option}"):
                                             st.plotly_chart(fig, theme=None, use_container_width=True)
+                                    elif vary == 'Pincode':
+                                        st.code('Phonepe  has  not  provided  Appopens  Data  for  Pincode')
 
                             st.write("")
                             st.write("")
                             st.write("")
+
                             colored_header(
                                 label="CONCLUSION",
                                 description= "State : maharashtra , District : bengaluru urban , Pincode : 201301 has higher user engagement",
-                                color_name="blue-green-70", )
+                                color_name="blue-green-70")
                     #---------------------------------------------------------------------------------------------------------------------------_____________________________________________________________________________________________________________________________________________________________________________________________
                     elif selected == "Time-Based Analysis":
 
@@ -2945,9 +2948,8 @@ class Phonepe_pulse:
                                             with c2.expander(f"{option} in pincode {pincode} Over the quaters of {year}"):
                                                 st.plotly_chart(fig, theme=None, use_container_width=True)
 
-
-
-
+                                        elif option == 'App Opens':
+                                            st.code('Phonepe has not provided app opens data for pincode')
 
                                 st.write("")
                                 st.write("")
@@ -3060,12 +3062,6 @@ class Phonepe_pulse:
                                             fig.update_traces(marker_color='#FFFFFF')
                                             with c2.expander(f"{option} in {state_selected}  Over The Years From 2018 To 2022"):
                                                 st.plotly_chart(fig, theme=None, use_container_width=True)
-
-
-
-
-
-
 
                                 #___________________________________________________________________________DISTRICT YEAR WISE _____________________________________________________________________
                                 elif select == "District":
@@ -3224,7 +3220,8 @@ class Phonepe_pulse:
                                                 fig.update_traces(marker_color='#FFFFFF')
                                                 with c2.expander(f"{option} in {pincode}  Over The Years From 2018 To 2022"):
                                                     st.plotly_chart(fig, theme=None, use_container_width=True)
-
+                                            elif option == 'App Opens':
+                                                st.code('Phonepe has not provided app opens data for pincode')
                                 st.write("")
                                 st.write("")
                                 st.write("")
@@ -3993,7 +3990,7 @@ class Phonepe_pulse:
                             color_name="blue-green-70", )
 #_________________________________________________________________________________________________________________________________________________________________________________
 
-# Creation Object for Class Phonepe Pulse 
+# Creation Object for Class Phonepe Pulse
 
 object = Phonepe_pulse()
 
