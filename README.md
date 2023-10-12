@@ -4,17 +4,17 @@ Phonepe Pulse Data Visualization Tool
 
 ## Overview
 
-This project aims to create an interactive data visualization tool for the Phonepe Pulse data available on GitHub. The tool provides user-friendly access to various metrics and statistics.
+    This project aims to create an interactive data visualization tool for the Phonepe Pulse data available on GitHub. The tool provides user-friendly access to various metrics and statistics.
 
 
 ## Features
 
-### Data Extraction: Automates the process of fetching data from the Phonepe Pulse GitHub repository.
-### Data Transformation: Cleans and processes the data using Python and Pandas.
-### Database Integration: Stores the cleaned data in a MySQL database for efficient retrieval.
-### Interactive Dashboard: Presents data using Streamlit and Plotly, offering dynamic visualizations.
-### Data Retrieval: Connects to the MySQL database to display data on the dashboard.
-### Customization: Offers more interactive options for users to select different data visualizations.
+       Data Extraction: Automates the process of fetching data from the Phonepe Pulse GitHub repository.
+       Data Transformation: Cleans and processes the data using Python and Pandas.
+       Database Integration: Stores the cleaned data in a MySQL database for efficient retrieval.
+       Interactive Dashboard: Presents data using Streamlit and Plotly, offering dynamic visualizations.
+       Data Retrieval: Connects to the MySQL database to display data on the dashboard.
+       Customization: Offers more interactive options for users to select different data visualizations.
 
 
 ## Getting Started
