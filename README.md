@@ -9,21 +9,21 @@ Phonepe Pulse Data Visualization Tool
 
 ## Features
 
-   Data Extraction: Automates the process of fetching data from the Phonepe Pulse GitHub repository.
-   Data Transformation: Cleans and processes the data using Python and Pandas.
-   Database Integration: Stores the cleaned data in a MySQL database for efficient retrieval.
-   Interactive Dashboard: Presents data using Streamlit and Plotly, offering dynamic visualizations.
-   Data Retrieval: Connects to the MySQL database to display data on the dashboard.
-   Customization: Offers more interactive options for users to select different data visualizations.
+       Data Extraction: Automates the process of fetching data from the Phonepe Pulse GitHub repository.
+       Data Transformation: Cleans and processes the data using Python and Pandas.
+       Database Integration: Stores the cleaned data in a MySQL database for efficient retrieval.
+       Interactive Dashboard: Presents data using Streamlit and Plotly, offering dynamic visualizations.
+       Data Retrieval: Connects to the MySQL database to display data on the dashboard.
+       Customization: Offers more interactive options for users to select different data visualizations.
 
 
 ## Getting Started
     
-Clone the GitHub repository.
-Use Python, Pandas, and mysql-connector-python for data processing.
-Set up the MySQL database for data storage.
-Create the interactive dashboard using Streamlit and Plotly.
-Fetch data from the database for dashboard updates.
+    Clone the GitHub repository.
+    Use Python, Pandas, and mysql-connector-python for data processing.
+    Set up the MySQL database for data storage.
+    Create the interactive dashboard using Streamlit and Plotly.
+    Fetch data from the database for dashboard updates.
 
 ## Technical Steps to Execute the Project
 
@@ -64,5 +64,5 @@ Fetch data from the database for dashboard updates.
 
     This project delivers a user-friendly geo-visualization dashboard for exploring Phonepe Pulse data. Users can access and interact with various data visualizations through a web browser, gaining valuable insights from the Phonepe Pulse GitHub repository.
 
-Connect Through LinkedIn For Queries !!!
+### Connect Through LinkedIn For Queries !!!
 
