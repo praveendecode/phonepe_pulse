@@ -1,59 +1,68 @@
-# Phonepe Pulse Data Exploartion and Visualization
+# Project Title
 
-Utilizing GitHub data, I conducted ETL processes and stored data in PostgreSQL. Employing Streamlit and Plotly, I crafted an interactive dashboard for PhonePe Pulse. This user-friendly tool visualizes and explores data with animations, offering an insightful experience.
+Phonepe Pulse Data Visualization Tool
 
-## Explanation To Do Execute The  Project : 
+## Overview
 
-      Step 1: Install Required Libraries That Mentioned in Dashboard.py File.
-
-      Step 2 : Using ETL.py File to do etl process.
-
-      Step 3: Fork the Dashboard Folder and run it on your local IDE.
-
-      Step 4: I have created Phonepe_pulse class 
-                  
-                   Process of Methods :
-
-                               Method  Dashboard: In this Dashboard method we have all Dashboard code for Data Visualization
+This project aims to create an interactive data visualization tool for the Phonepe Pulse data available on GitHub. The tool provides user-friendly access to various metrics and statistics.
 
 
-                               Note : Stremlit was used in this project to show our cool codes in UI with eye catching data presentation
-                               
+## Features
+
+### Data Extraction: Automates the process of fetching data from the Phonepe Pulse GitHub repository.
+### Data Transformation: Cleans and processes the data using Python and Pandas.
+### Database Integration: Stores the cleaned data in a MySQL database for efficient retrieval.
+### Interactive Dashboard: Presents data using Streamlit and Plotly, offering dynamic visualizations.
+### Data Retrieval: Connects to the MySQL database to display data on the dashboard.
+### Customization: Offers more interactive options for users to select different data visualizations.
+
+
+## Getting Started
+
+    Clone the GitHub repository.
+    Use Python, Pandas, and mysql-connector-python for data processing.
+    Set up the MySQL database for data storage.
+    Create the interactive dashboard using Streamlit and Plotly.
+    Fetch data from the database for dashboard updates.
+
+## Technical Steps to Execute the Project
+
+### Step 1: Install Required Libraries
+
+    Before running the project, make sure to install the necessary libraries mentioned in the Dashboard.py file.
+
+### Step 2: Execute ETL Process
+
+    Use the ETL.py file to perform the Extract, Transform, Load (ETL) process on the Phonepe Pulse data.
+
+### Step 3: Run the Dashboard
+
+    Fork the Dashboard folder and run it in your local integrated development environment (IDE).
+
+### Step 4: Utilize the Phonepe_pulse Class
+
+    In this project, a Phonepe_pulse class has been created to manage the methods and processes.
+
+### Methods:
+
+    Dashboard: This method contains the code for the interactive dashboard, where data visualizations are presented.
+
+        Note: Streamlit is used in this project to make our code visually appealing and to provide an eye-catching data presentation.
 
 ## Skills Covered ✅ ⬇️
 
-              Python (Scripting)
-              
-              ETL
-              
-              MongoDB
-              
-              SQL
-              
-              Data Managment using  PostgresSQl
+    Python (Scripting)
+    ETL (Extract, Transform, Load)
+    MongoDB
+    SQL (Structured Query Language)
+    Data Management using PostgreSQL
+    User Interface: Streamlit
+    Data Visualization: Plotly-express
+    IDE: PyCharm Community Version
 
-              User Interface : Streammlit
+## Results
 
-              Data Visualization : Plotly-express
-              
-              IDE: Pycharm Community Version
+    This project delivers a user-friendly geo-visualization dashboard for exploring Phonepe Pulse data. Users can access and interact with various data visualizations through a web browser, gaining valuable insights from the Phonepe Pulse GitHub repository.
 
-
-## Connect Through [Linkedln](https://www.linkedin.com/in/praveen-n-2b4004223/) For Queries !!!
-
-           
-
-                               
-
-                                
-
-                                
-
-       
-
-
-
-
-
-
+Connect Through LinkedIn For Queries !!!
 
