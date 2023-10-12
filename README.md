@@ -1,8 +1,7 @@
 # Project Title
 
-Phonepe Pulse Data Visualization Tool
-
-![image](https://github.com/praveendecode/phonepe_pulse/assets/95226524/2cef0f0d-d70c-4cfd-be08-d9d270e0a151)
+Phonepe Pulse Data Visualization (Financial Domain)
+![image](https://github.com/praveendecode/phonepe_pulse/assets/95226524/88f01431-3a50-4775-9331-fc9e3721ff65)
 
 
 ## Overview
