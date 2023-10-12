@@ -2,6 +2,9 @@
 
 Phonepe Pulse Data Visualization Tool
 
+![image](https://github.com/praveendecode/phonepe_pulse/assets/95226524/2cef0f0d-d70c-4cfd-be08-d9d270e0a151)
+
+
 ## Overview
 
     This project aims to create an interactive data visualization tool for the Phonepe Pulse data available on GitHub. The tool provides user-friendly access to various metrics and statistics.
