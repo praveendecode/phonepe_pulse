@@ -7,7 +7,7 @@
 
 # Overview
 
-    This project aims to create an interactive data visualization tool for the Phonepe Pulse data available on GitHub. The tool provides user-friendly access to various metrics and statistics.
+  - This project aims to create an interactive data visualization tool for the Phonepe Pulse data available on GitHub. The tool provides user-friendly access to various metrics and statistics.
 
 
 ## Features
