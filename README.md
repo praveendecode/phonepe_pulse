@@ -60,7 +60,7 @@
 
   - Dashboard : This method contains the code for the interactive dashboard, where data visualizations are presented.
 
-        Note: Streamlit is used in this project to make our code visually appealing and to provide an eye-catching data presentation.
+  - Note: Streamlit is used in this project to make our code visually appealing and to provide an eye-catching data presentation.
 
 # Tools Covered 
 
