@@ -16,11 +16,11 @@
        
   - Data Transformation: Cleans and processes the data using Python and Pandas.
        
-  - Database Integration: Stores the cleaned data in a MySQL database for efficient retrieval.
+  - Database Integration: Stores the cleaned data in a PostgreSQL database for efficient retrieval.
        
   - Interactive Dashboard: Presents data using Streamlit and Plotly, offering dynamic visualizations.
        
-  - Data Retrieval: Connects to the MySQL database to display data on the dashboard.
+  - Data Retrieval: Connects to the PostgreSQL database to display data on the dashboard.
        
   - Customization: Offers more interactive options for users to select different data visualizations.
 
@@ -29,9 +29,9 @@
     
   - Clone the GitHub repository.
     
-  - Use Python, Pandas, and mysql-connector-python for data processing.
+  - Use Python, Pandas, and pymongo for data processing.
     
-  - Set up the MySQL database for data storage.
+  - Set up the PostgreSQL database for data storage.
     
   - Create the interactive dashboard using Streamlit and Plotly.
     
