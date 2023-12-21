@@ -12,7 +12,7 @@
 
 ## Features
 
-  - Data Extraction: Automates the process of fetching data from the Phonepe Pulse GitHub repository.
+  - Data Extraction: Automates the process of fetching data from the Phonepe Pulse GitHub repository
        
   - Data Transformation: Cleans and processes the data using Python and Pandas.
        
